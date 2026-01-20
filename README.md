@@ -20,7 +20,31 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
 - changes in executor: [executor.py](examples/voxceleb/v2/wespeaker/utils/executor.py)
 - changes in train.py: comment out code 'jit', since it is not compatablile with MVA [train.py](examples/voxceleb/v2/wespeaker/bin/train.py#L153)
 
-
+## Results: 
+| Model | Params | Flops | LM | AS-Norm | QMF | vox1-O-clean | vox1-E-clean | vox1-H-clean |
+|:------|:------:|:------|:--:|:-------:|:---:|:------------:|:------------:|:------------:|
+| ECAPA_TDNN_GLOB_c512-ASTP-emb192  | 6.19M | 1.04G | × | × | × | 1.069 | 1.209 | 2.310 |
+|                                   |       |       | × | √ | × | 0.957 | 1.128 | 2.105 |
+|                                   |       |       | √ | × | × | 0.878 | 1.072 | 2.007 |
+|                                   |       |       | √ | √ | × | 0.782 | 1.005 | 1.824 |
+| ECAPA_TDNN_GLOB_c1024-ASTP-emb192 | 14.65M | 2.65G | × | × | × | 0.856 | 1.072 | 2.059 |
+|                                   |        |       | × | √ | × | 0.808 | 0.990 | 1.874 |
+|                                   |        |       | √ | × | × | 0.798 | 0.993 | 1.883 |
+|                                   |        |       | √ | √ | × | 0.728 | 0.929 | 1.721 |
+|                                   |        |       | √ | √ | √ | 0.707 | 0.894 | 1.615 |
+| ResNet34-TSTP-emb256 | 6.63M | 4.55G | × | × | × | 0.867 | 1.049 | 1.959 |
+|                      |       |       | × | √ | × | 0.787 | 0.964 | 1.726 |
+|                      |       |       | × | √ | √ | 0.718 | 0.911 | 1.606 |
+|                      |       |       | √ | × | × | 0.797 | 0.937 | 1.695 |
+|                      |       |       | √ | √ | × | 0.723 | 0.867 | 1.532 |
+|                      |       |       | √ | √ | √ | 0.659 | 0.821 | 1.437 |
+| XI_VEC_ECAPA_TDNN_c512       | 5.9M | 1.04G      | x | x | × | 0.995 | 1.130 | 2.169 |
+|                  |       |       | × | √ | × | 0.883 | 1.056 | 1.976 |
+|                  |       |       | √ | × | × | 0.909 | 1.000 | 1.855 |
+|                  |       |       | √ | √ | × | 0.787 | 0.930 | 1.693 |
+| **ECAPA_TDNN_c512_u_cube_xi(ours)**| 6.7M | 1.20G      | x | x | x | 0.782 | 1.016 | 1.888 | 
+| **ResNet34_u_cube_xi(ours)**       | 7.9M |            | x | x | x | 0.867 | 0.868 | 1.641 |
+| **ReDimNet-B2(ours)**              | 5.5M |            | x | x | x | 0.606 | 0.779 | 1.494 |
 
 
 
