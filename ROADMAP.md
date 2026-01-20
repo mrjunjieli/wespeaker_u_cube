@@ -1,29 +1,3 @@
-
-
-# $\mathcal{U}^3$-xi 
-
-This is the official implementation of our paper "$\mathcal{U}^3$-xi: Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty."
-
-## Experiments: 
-Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2) directory.
-
-- configs: 
-    - [ecapa_tdnn_u_cube.yaml](examples/voxceleb/v2/conf/ecapa_tdnn_u_cube.yaml)
-    - [resnet_u_cube.yaml](examples/voxceleb/v2/conf/resnet_u_cube.yaml)
-    - [redimnet_u_cube.yaml](examples/voxceleb/v2/conf/redimnet_u_cube.yaml)
-- models:
-    - [ECAPA-TDNN model](examples/voxceleb/v2/wespeaker/models/ecapa_tdnn.py#L230-L244)
-    - [ResNet](wespeaker/models/resnet.py#195)
-    - [RedimNet](wespeaker/models/redimnet.py#L863)
-- pooling_layer: [U_Cube_XI](examples/voxceleb/v2/wespeaker/models/pooling_layers.py#L422)
-    - Multi view selfattention: [MVA](examples/voxceleb/v2/wespeaker/models/MHA.py)
-- projection: [ArcMarginProduct_uncertainty](examples/voxceleb/v2/wespeaker/models/projections.py#L37)
-- changes in executor: [executor.py](examples/voxceleb/v2/wespeaker/utils/executor.py)
-- changes in train.py: comment out code 'jit', since it is not compatablile with MVA [train.py](examples/voxceleb/v2/wespeaker/bin/train.py#L153)
-
-
-
-
 # Wespeaker Roadmap
 
 ## Version 2.0 (Time: 2023.12)
