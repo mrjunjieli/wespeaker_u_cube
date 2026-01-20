@@ -59,7 +59,14 @@ def run_epoch(dataloader, epoch_iter, model, criterion, optimizer, scheduler,
 
             outputs = model(features)  # (embed_a,embed_b) in most cases
             embeds = outputs[-1] if isinstance(outputs, tuple) else outputs
-            outputs = model.module.projection(embeds, targets)
+            
+            # this is for U_Cube
+            if  isinstance(outputs, tuple) and len(outputs) == 3:
+                variance = outputs[1]
+                outputs = model.module.projection(embeds,variance, targets)
+            else:
+                outputs = model.module.projection(embeds, targets)
+            
             if isinstance(outputs, tuple):
                 outputs, loss = outputs
             else:

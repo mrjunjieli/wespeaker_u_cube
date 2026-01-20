@@ -204,6 +204,7 @@ class ECAPA_TDNN(nn.Module):
             self.bn2 = nn.BatchNorm1d(embed_dim)
         else:
             self.bn2 = nn.Identity()
+        self.pooling = pooling_func
 
     def _get_frame_level_feat(self, x):
         # for inner class usage
@@ -227,11 +228,30 @@ class ECAPA_TDNN(nn.Module):
     def forward(self, x):
         out, out4 = self._get_frame_level_feat(x)
         out = F.relu(out)
-        out = self.bn(self.pool(out))
-        out = self.linear(out)
-        if self.emb_bn:
-            out = self.bn2(out)
-        return out4, out
+        # This is for U_Cube_XI pooling which returns two outputs
+        if self.pooling.startswith('U_Cube_XI'):
+            out, var_diag = self.pool(out) 
+            # mean branch 
+            out = self.bn(out)
+            out = self.linear(out)
+            # variance branch 
+            var_diag = var_diag / (self.bn.running_var + self.bn.eps)
+            var_diag = self.bn.weight**2 * var_diag
+            var = torch.matmul(
+                self.linear.weight, torch.matmul(
+                    torch.diag_embed(var_diag), (self.linear.weight).T))
+            var_diag = torch.diagonal(var,dim1=-2, dim2=-1)
+            if self.emb_bn:
+                out = self.bn2(out)
+                var_diag = var_diag / (self.bn2.running_var + self.bn2.eps)
+                var_diag = self.bn2.weight**2 * var_diag
+            return out4, var_diag, out # (Batch, emb_dim)
+        else:
+            out = self.bn(self.pool(out))
+            out = self.linear(out)
+            if self.emb_bn:
+                out = self.bn2(out)
+            return out4, out
 
 
 def ECAPA_TDNN_c1024(feat_dim, embed_dim, pooling_func='ASTP', emb_bn=False):

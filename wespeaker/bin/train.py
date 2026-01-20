@@ -150,9 +150,9 @@ def train(config='conf/config.yaml', **kwargs):
         # !!!IMPORTANT!!!
         # Try to export the model by script, if fails, we should refine
         # the code to satisfy the script export requirements
-        if frontend_type == 'fbank':
-            script_model = torch.jit.script(model)
-            script_model.save(os.path.join(model_dir, 'init.zip'))
+        # if frontend_type == 'fbank':
+        #     script_model = torch.jit.script(model)
+        #     script_model.save(os.path.join(model_dir, 'init.zip'))
 
     # If specify checkpoint, load some info from checkpoint.
     # For checkpoint, frontend, speaker model, and projection layer
@@ -177,8 +177,9 @@ def train(config='conf/config.yaml', **kwargs):
         logger.info("loss criterion is: " + configs['loss'])
 
     if 'initial_lr' in configs['scheduler_args']:
-        configs['optimizer_args']['lr'] = configs['scheduler_args'].pop(
-            'initial_lr')
+        configs['optimizer_args']['lr'] = (
+            configs['scheduler_args']['initial_lr']
+        )
     optimizer = getattr(torch.optim,
                         configs['optimizer'])(ddp_model.parameters(),
                                               **configs['optimizer_args'])

@@ -22,6 +22,8 @@ even though we remove the mean statistic, on Voxceleb.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wespeaker.models.MHA as MHA 
+
 
 
 class TAP(nn.Module):
@@ -342,6 +344,11 @@ class MQMHASTP(torch.nn.Module):
 
 
 class XI(torch.nn.Module):
+    '''
+    Reference:
+    Xi-Vector Embedding for Speaker Recognition 
+    https://ieeexplore.ieee.org/document/9463712 
+    '''
     def __init__(self, in_dim, hidden_size=256, stddev=False,
                  train_mean=True, train_prec=True, **kwargs):
         super(XI, self).__init__()
@@ -412,6 +419,80 @@ class XI(torch.nn.Module):
     def get_prior(self):
         return self.prior_mean, self.prior_logprec
 
+class U_Cube_XI(torch.nn.Module):
+    '''
+    Reference:
+    $\mathcal{U}^3$-xi: Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
+    '''
+    def __init__(self, in_dim, hidden_size=256,
+                 train_mean=True, train_prec=True, **kwargs):
+        super(U_Cube_XI, self).__init__()
+        self.input_dim = in_dim
+        self.output_dim = self.input_dim
+        self.prior_mean = torch.nn.Parameter(torch.zeros(1, self.input_dim),
+                                             requires_grad=train_mean)
+        self.prior_logprec = torch.nn.Parameter(torch.zeros(1, self.input_dim),
+                                                requires_grad=train_prec)
+        self.softmax = torch.nn.Softmax(dim=2)
+
+        # Log-precision estimator
+        self.lin1_relu_bn = nn.Sequential(
+            nn.Conv1d(self.input_dim, hidden_size,
+                      kernel_size=1, stride=1, bias=True),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(hidden_size))
+        self.encoder_layer = MHA.MultiViewTransformerEncoderLayer(
+            embed_dim=hidden_size,
+            num_heads = 8,
+            ff_hidden=hidden_size*4,
+            dropout=0.2
+        )
+        self.lin2 = nn.Conv1d(hidden_size, self.input_dim, kernel_size=1,
+                              stride=1, bias=True)
+        self.softplus2 = torch.nn.Softplus(beta=1, threshold=20)
+
+    def forward(self, inputs):
+        """
+        @inputs: a 3-dimensional tensor (a batch),
+        including [samples-index, frames-dim-index, frames-index]
+        """
+        if len(inputs.shape)>3: 
+            inputs = torch.flatten(inputs, start_dim=1, end_dim=2)   # for resnet 
+        assert len(inputs.shape) == 3
+        assert inputs.shape[1] == self.input_dim
+        feat = inputs
+        # Log-precision estimator
+        # frame precision estimate
+        temp = self.lin1_relu_bn(feat)
+        temp = self.encoder_layer(temp.permute(0,2,1)).permute(0,2,1)
+        logprec = self.softplus2(self.lin2(temp))
+
+        # Square and take log before softmax
+        logprec = 2.0 * torch.log(logprec)
+        # Gaussian Posterior Inference
+        # Option 1: a_o (prior_mean-phi) included in variance
+        weight_attn = self.softmax(
+            torch.cat(
+                (logprec,
+                 self.prior_logprec.repeat(
+                     logprec.shape[0], 1).unsqueeze(dim=2)), 2))
+        # Posterior precision
+        Ls = torch.sum(torch.exp(torch.cat(
+            (logprec, self.prior_logprec.repeat(
+                logprec.shape[0], 1).unsqueeze(dim=2)), 2)), dim=2)
+        # Posterior mean
+        phi = torch.sum(torch.cat(
+            (feat, self.prior_mean.repeat(
+                feat.shape[0], 1).unsqueeze(dim=2)), 2) * weight_attn, dim=2)
+
+        return phi,  1/(torch.clamp(Ls,min=1.0e-12))
+
+    def get_out_dim(self):
+        return self.output_dim
+
+    def get_prior(self):
+        return self.prior_mean, self.prior_logprec
+    
 if __name__ == '__main__':
     data = torch.randn(16, 512, 10, 35)
     # model = StatisticsPooling()

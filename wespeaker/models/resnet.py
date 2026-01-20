@@ -25,7 +25,6 @@ Reference:
 [1] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
     Deep Residual Learning for Image Recognition. arXiv:1512.03385
 '''
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -159,7 +158,8 @@ class ResNet(nn.Module):
         else:
             self.seg_bn_1 = nn.Identity()
             self.seg_2 = nn.Identity()
-
+        self.pooling = pooling_func
+        
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
@@ -191,17 +191,40 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         out = self._get_frame_level_feat(x)
+        # This is for U_Cube_XI pooling which returns two outputs
+        if self.pooling.startswith('U_Cube_XI'):
+            stats, var_diag = self.pool(out)
+            
+            embed_a = self.seg_1(stats)
+            var_diag_a =  torch.matmul(self.seg_1.weight, torch.matmul(
+                    torch.diag_embed(var_diag), (self.seg_1.weight).T))
+            var_diag_a = torch.diagonal(var_diag_a,dim1=-2, dim2=-1)
+            if self.two_emb_layer:
+                out = self.seg_bn_1(embed_a)
+                embed_b = self.seg_2(out)
 
-        stats = self.pool(out)
+                var_diag = var_diag_a / (self.seg_bn_1.running_var + self.seg_bn_1.eps)
+                var_diag = self.seg_bn_1.weight**2 * var_diag
+                var_diag_b = torch.matmul(
+                    self.seg_2.weight, torch.matmul(
+                        torch.diag_embed(var_diag), (self.seg_2.weight).T))
+                var_diag_b = torch.diagonal(var_diag_b,dim1=-2, dim2=-1)
+                return embed_a, var_diag_b, embed_b 
+            else: 
+                return  torch.tensor(0.0), var_diag_a, embed_a
+        else: 
+            stats = self.pool(out)
 
-        embed_a = self.seg_1(stats)
-        if self.two_emb_layer:
-            out = F.relu(embed_a)
-            out = self.seg_bn_1(out)
-            embed_b = self.seg_2(out)
-            return embed_a, embed_b
-        else:
-            return torch.tensor(0.0), embed_a
+            embed_a = self.seg_1(stats)
+            if self.two_emb_layer:
+                out = F.relu(embed_a)
+                out = self.seg_bn_1(out)
+                embed_b = self.seg_2(out)
+                return embed_a, embed_b
+            else:
+                return torch.tensor(0.0), embed_a
+
+
 
 
 def ResNet18(feat_dim, embed_dim, pooling_func='TSTP', two_emb_layer=False):
@@ -258,6 +281,8 @@ def ResNet293(feat_dim, embed_dim, pooling_func='TSTP', two_emb_layer=False):
                   embed_dim=embed_dim,
                   pooling_func=pooling_func,
                   two_emb_layer=two_emb_layer)
+
+
 
 
 if __name__ == '__main__':
