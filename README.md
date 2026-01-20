@@ -45,6 +45,9 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
 | **ECAPA_TDNN_c512_u_cube_xi(ours)**| 6.7M | 1.20G      | x | x | x | 0.782 | 1.016 | 1.888 | 
 | **ResNet34_u_cube_xi(ours)**       | 7.9M |            | x | x | x | 0.867 | 0.868 | 1.641 |
 | **ReDimNet-B2(ours)**              | 5.5M |            | x | x | x | 0.606 | 0.779 | 1.494 |
+|                                    |      |            | √ | x | x | 0.489 | 0.698 | 1.311 |
+|                                    |      |            | √ | √ | x | 0.399 | 0.638 | 1.170 |
+
 
 
 
