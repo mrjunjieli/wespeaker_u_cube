@@ -9,7 +9,7 @@
 #   bash run.sh --stage 3 --stop-stage 3 --HOST_NODE_ADDR "xxx.xxx.xxx.xxx:port" --num_nodes num_node
 
 stage=3
-stop_stage=3
+stop_stage=5
 
 HOST_NODE_ADDR="localhost:29400"
 num_nodes=1
@@ -19,7 +19,7 @@ data=data
 data_type="shard"  # shard/raw
 
 config=conf/ecapa_tdnn_u_cube.yaml
-exp_dir=exp/ECAPA_TDNN-512-U_CUBE-emb192-ArcMargin-SGD-epoch150
+exp_dir=exp/ECAPA_TDNN-512-U_CUBE-emb192-ArcMargin-SGD-epoch150-clamp_range15
 gpus="[2,3]"
 num_avg=10
 checkpoint=
