@@ -8,7 +8,7 @@
 # multi-node + multi-gpus:
 #   bash run.sh --stage 3 --stop-stage 3 --HOST_NODE_ADDR "xxx.xxx.xxx.xxx:port" --num_nodes num_node
 
-stage=3
+stage=4
 stop_stage=5
 
 HOST_NODE_ADDR="localhost:29400"
@@ -19,7 +19,7 @@ data=data
 data_type="shard"  # shard/raw
 
 config=conf/ecapa_tdnn_u_cube.yaml
-exp_dir=exp/ECAPA_TDNN-512-U_CUBE-emb192-ArcMargin-SGD-epoch150-clamp_range15
+exp_dir=exp/resnet34_u_cube
 gpus="[2,3]"
 num_avg=10
 checkpoint=
@@ -98,7 +98,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   echo "Extract embeddings ..."
   local/extract_vox.sh \
     --exp_dir $exp_dir --model_path $model_path \
-    --nj 4 --gpus $gpus --data_type $data_type --data ${data}
+    --nj 2 --gpus $gpus --data_type $data_type --data ${data}
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then

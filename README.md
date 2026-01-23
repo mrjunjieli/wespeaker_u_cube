@@ -48,7 +48,12 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
 |                                    |      |            | √ | x | x | 0.489 | 0.698 | 1.311 |
 |                                    |      |            | √ | √ | x | 0.399 | 0.638 | 1.170 |
 
+## Pretrained Models:
+There models are re-trained, hence results infered from these are slightly different from our paper.  
 
+- [Voxceleb2_ECAPA-TDNN-512_u_cube](https://drive.google.com/file/d/1bMqisoKLM4eKkCAW7k7Ya-M3tNERQVh0/view?usp=drive_link)
+- [Voxceleb2_ResNet34_u_cube](https://drive.google.com/file/d/1Lf2CnB6ReIMyq7w06ucORmMF41GzdH76/view?usp=drive_link)
+- [ReDimNet-B2_u_cube](https://drive.google.com/file/d/1S2pWyI3HIRGgdTh686J08oAWK3UmqAT-/view?usp=drive_link)
 
 
 
