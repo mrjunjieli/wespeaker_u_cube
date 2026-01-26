@@ -1,9 +1,16 @@
 
-# $\mathcal{U}^3$-xi 
+# $\mathcal{U}^3$-xi  Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
+[![arxiv](https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg)](https://arxiv.org/abs/2601.15719)
 
+## ✨Key Highlights: 
 This is the official implementation of our paper "$\mathcal{U}^3$-xi: Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty."
 
-## Experiments: 
+We introduce three main modifications:
+- Uncertainty Estimation Module: multi-view self-attention (MVA) 
+- Global Uncertainty Supervision by incoporating uncertainty into scale 
+- Uncertainty-aware cosine scoring 
+
+## 🚀Experiments: 
 Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2) directory.
 
 - configs: 
@@ -20,7 +27,7 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
 - changes in executor: [executor.py](examples/voxceleb/v2/wespeaker/utils/executor.py)
 - changes in train.py: comment out code 'jit', since it is not compatablile with MVA [train.py](examples/voxceleb/v2/wespeaker/bin/train.py#L153)
 
-## Results: 
+## 📊Results: 
 | Model | Params | Flops | LM | AS-Norm | QMF | vox1-O-clean | vox1-E-clean | vox1-H-clean |
 |:------|:------:|:------|:--:|:-------:|:---:|:------------:|:------------:|:------------:|
 | ECAPA_TDNN_GLOB_c512-ASTP-emb192  | 6.19M | 1.04G | × | × | × | 1.069 | 1.209 | 2.310 |
@@ -48,7 +55,7 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
 |                                    |      |            | √ | x | x | 0.489 | 0.698 | 1.311 |
 |                                    |      |            | √ | √ | x | 0.399 | 0.638 | 1.170 |
 
-## Pretrained Models:
+## 💥Pretrained Models:
 There models are re-trained, hence results infered from these are slightly different from our paper.  
 
 - [Voxceleb2_ECAPA-TDNN-512_u_cube](https://drive.google.com/file/d/1bMqisoKLM4eKkCAW7k7Ya-M3tNERQVh0/view?usp=drive_link)
