@@ -8,7 +8,7 @@
 # multi-node + multi-gpus:
 #   bash run.sh --stage 3 --stop-stage 3 --HOST_NODE_ADDR "xxx.xxx.xxx.xxx:port" --num_nodes num_node
 
-stage=4
+stage=3
 stop_stage=5
 
 HOST_NODE_ADDR="localhost:29400"
