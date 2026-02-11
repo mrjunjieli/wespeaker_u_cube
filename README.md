@@ -1,6 +1,20 @@
 
 # $\mathcal{U}^3$-xi  Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
-[![arxiv](https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg)](https://arxiv.org/abs/2601.15719)
+
+
+<p align="center">
+  <b>Junjie Li</b>, Kong Aik Lee <br>
+  <i>The Hong Kong Polytechnic University</i>
+</p>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2601.15719">
+    <img src="https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg"/>
+  </a>
+  <img src="https://visitor-badge.laobi.icu/badge?page_id=mrjunjieli.wespeaker_u_cube"/>
+  <img src="https://img.shields.io/github/stars/mrjunjieli/wespeaker_u_cube?style=social"/>
+</p>
+
 
 ## ✨Key Highlights: 
 This is the official implementation of our paper "$\mathcal{U}^3$-xi: Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty."
