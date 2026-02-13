@@ -1,5 +1,5 @@
 
-# $\mathcal{U}^3$-xi  Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
+# 1. $\mathcal{U}^3$-xi  Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
 
 
 <p align="center">
@@ -77,6 +77,46 @@ There models are re-trained, hence results infered from these are slightly diffe
 - [Voxceleb2_ReDimNet-B2_u_cube](https://drive.google.com/file/d/1S2pWyI3HIRGgdTh686J08oAWK3UmqAT-/view?usp=drive_link)
 - [Voxceleb2_Xi-ECAPA-TDNN-512](https://drive.google.com/file/d/1Aw1qPe_oQkjDnFjYunCq5-KXIga3J1r6/view?usp=sharing)
 
+
+
+# 2. Uncertainty Score Normalization and  Calibration for Speaker Verification
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2601.15719">
+    <img src="https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg"/>
+  </a>
+</p>
+
+Below are introductions about 'Uncertainty Score Normalization and  Calibration for Speaker Verification'
+
+We introduce three main modifications:
+- Uncertainty-aware cosine score 
+- UAS-Norm: Uncertainty-Aware AS-Norm
+- UQMFs: Uncertainty-Aware Quality Measure Functions
+
+## 🚀Experiments: 
+Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2) directory.
+
+- extract uncertainty
+  - [local/extract_vox_uncertainty.sh](examples/voxceleb/v2/local/extract_vox_uncertainty.sh)
+  - [tools/extract_embedding_uncertainty.sh](examples/voxceleb/v2/tools/extract_embedding_uncertainty.sh)
+  - [wespeaker/bin/extract_uncertainty.py](wespeaker/bin/extract_uncertainty.py)
+
+- uncertainty-aware cosine score
+  - [local/score_uncertainty.sh](examples/voxceleb/v2/local/score_uncertainty.sh)
+  - [wespeaker/bin/score_uncertainty.py](wespeaker/bin/score_uncertainty.py)
+
+- uncertainty-aware AS-norm (uncertainty-aware cosine score + uncertainty-aware AS-norm)
+  - [local/score_norm_uncertainty.sh](examples/voxceleb/v2/local/score_norm_uncertainty.sh)
+  - [variance_mean.py](examples/voxceleb/v2/tools/variance_mean.py)
+  - [wespeaker/bin/score_norm_uncertainty.py](wespeaker/bin/score_norm_uncertainty.py)
+
+- uncertianty-aware QMFs (uncertainty-aware cosine score + uncertainty-aware AS-norm + uncertianty-aware QMFs)
+  - [local/score_calibration_uncertainty.sh](local/score_calibration_uncertainty.sh)
+  - [wespeaker/bin/score_norm_forvox2.py](wespeaker/bin/score_norm_forvox2.py)
+  - [wespeaker/bin/score_calibration_uncertainty.py](wespeaker/bin/score_calibration_uncertain.py)
+
+  
 
 # WeSpeaker
 

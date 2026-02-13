@@ -321,7 +321,6 @@ class ArcMarginProduct_uncertainty(nn.Module):
         one_hot = input.new_zeros(cosine.size())
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
-        output *= self.scale
         
         # Uncertainty scaling
         epsion = 1e-6        
@@ -330,8 +329,9 @@ class ArcMarginProduct_uncertainty(nn.Module):
         numerator = torch.sum(input * input, dim=1, keepdim=True) 
         denominator = torch.sum(input * (covariance_denominator) * input + epsion, dim=1, keepdim=True) 
         uncertainty_scale = (numerator / denominator)**0.5
-        output *= (uncertainty_scale)
+        output *= uncertainty_scale
 
+        output *= self.scale
         return output
 
     def extra_repr(self):

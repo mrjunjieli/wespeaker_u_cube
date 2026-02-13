@@ -8,8 +8,8 @@
 # multi-node + multi-gpus:
 #   bash run.sh --stage 3 --stop-stage 3 --HOST_NODE_ADDR "xxx.xxx.xxx.xxx:port" --num_nodes num_node
 
-stage=3
-stop_stage=5
+stage=7
+stop_stage=7
 
 HOST_NODE_ADDR="localhost:29400"
 num_nodes=1
@@ -19,7 +19,8 @@ data=data
 data_type="shard"  # shard/raw
 
 config=conf/ecapa_tdnn_u_cube.yaml
-exp_dir=exp/resnet34_u_cube
+# exp_dir=exp/ecapa_tdnn_u_cube
+exp_dir=exp/ECAPA_TDNN-512-U_CUBE-emb192-ArcMargin-SGD-epoch150-clamp_range15
 gpus="[2,3]"
 num_avg=10
 checkpoint=
@@ -95,15 +96,32 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     model_path=$exp_dir/models/convert_model.pt
   fi
 
-  echo "Extract embeddings ..."
-  local/extract_vox.sh \
+
+  # echo "Extract embeddings ..."
+  # local/extract_vox.sh \
+  #   --exp_dir $exp_dir --model_path $model_path \
+  #   --nj 2 --gpus $gpus --data_type $data_type --data ${data}
+
+# if you want to extract uncertainty, you can run the following command instead.
+# this script will extract both embeddings and uncertainty 
+  echo "Extract embeddings and uncertainty ..."
+  local/extract_vox_uncertainty.sh \
     --exp_dir $exp_dir --model_path $model_path \
-    --nj 2 --gpus $gpus --data_type $data_type --data ${data}
+    --nj 6 --gpus $gpus --data_type $data_type --data ${data}
+
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   echo "Score ..."
   local/score.sh \
+    --stage 1 --stop-stage 2 \
+    --data ${data} \
+    --exp_dir $exp_dir \
+    --trials "$trials"
+
+  #uncertainty-aware cosine scoring
+  echo "Uncertainty-aware score ..."
+  local/score_uncertainty.sh \
     --stage 1 --stop-stage 2 \
     --data ${data} \
     --exp_dir $exp_dir \
@@ -120,11 +138,32 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     --data ${data} \
     --exp_dir $exp_dir \
     --trials "$trials"
+
+  echo "Uncertianty-aware score norm ..."
+  local/score_norm_uncertainty.sh \
+    --stage 1 --stop-stage 3 \
+    --score_norm_method $score_norm_method \
+    --cohort_set vox2_dev \
+    --top_n $top_n \
+    --data ${data} \
+    --exp_dir $exp_dir \
+    --trials "$trials"
 fi
 
 if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
   echo "Score calibration ..."
   local/score_calibration.sh \
+    --stage 1 --stop-stage 5 \
+    --score_norm_method $score_norm_method \
+    --calibration_trial "vox2_cali.kaldi" \
+    --cohort_set vox2_dev \
+    --top_n $top_n \
+    --data ${data} \
+    --exp_dir $exp_dir \
+    --trials "$trials"
+
+  echo "Uncertainty-aware score calibration ..."
+  local/score_calibration_uncertainty.sh \
     --stage 1 --stop-stage 5 \
     --score_norm_method $score_norm_method \
     --calibration_trial "vox2_cali.kaldi" \
