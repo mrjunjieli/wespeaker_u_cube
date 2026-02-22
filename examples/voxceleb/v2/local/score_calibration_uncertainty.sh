@@ -108,7 +108,7 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
       --c_fa 1 \
       --c_miss 1 \
       ${scores_dir}/${cali_output_name}_${x}.score \
-      2>&1 | tee -a ${scores_dir}/vox1_cali_${score_norm_method}${top_n}_result_uncertainty
+      2>&1 | tee -a ${scores_dir}/vox1_cali_${score_norm_method}${top_n}_result
 
     python wespeaker/bin/compute_det.py \
       ${scores_dir}/${cali_output_name}_${x}.score
