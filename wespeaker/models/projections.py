@@ -342,6 +342,103 @@ class ArcMarginProduct_uncertainty(nn.Module):
                                                       self.easy_margin)
 
 
+class ArcMarginProduct_uncertainty_inter_intra(nn.Module):
+    r"""Implement of large margin arc distance: :
+        Args:
+            in_features: size of each input sample
+            out_features: size of each output sample
+            scale: norm of input feature
+            margin: margin
+            cos(theta + margin)
+        """
+
+    def __init__(self,
+                 in_features,
+                 out_features,
+                 scale=32.0,
+                 margin=0.2,
+                 easy_margin=False):
+        super(ArcMarginProduct_uncertainty_inter_intra, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.scale = scale
+        self.margin = margin
+        self.weight = nn.Parameter(torch.FloatTensor(out_features,
+                                                     in_features))
+        nn.init.xavier_uniform_(self.weight)
+
+        self.easy_margin = easy_margin
+        self.cos_m = math.cos(margin)
+        self.sin_m = math.sin(margin)
+        self.th = math.cos(math.pi - margin)
+        self.mm = math.sin(math.pi - margin) * margin
+        self.mmm = 1.0 + math.cos(
+            math.pi - margin)  # this can make the output more continuous
+        ########
+        self.m = self.margin
+        ########
+
+    def update(self, margin=0.2):
+        self.margin = margin
+        self.cos_m = math.cos(margin)
+        self.sin_m = math.sin(margin)
+        self.th = math.cos(math.pi - margin)
+        self.mm = math.sin(math.pi - margin) * margin
+        self.m = self.margin
+        self.mmm = 1.0 + math.cos(math.pi - margin)
+        # self.weight = self.weight
+        # self.scale = self.scale
+
+    def forward(self, input, covariance, label):
+        cosine = F.linear(F.normalize(input), F.normalize(self.weight))
+        sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
+        phi = cosine * self.cos_m - sine * self.sin_m
+        if self.easy_margin:
+            phi = torch.where(cosine > 0, phi, cosine)
+        else:
+            ########
+            # phi = torch.where(cosine > self.th, phi, cosine - self.mm)
+            phi = torch.where(cosine > self.th, phi, cosine - self.mmm)
+            ########
+
+        # Compute cosine gap for uncertainty scaling
+        with torch.no_grad():
+            # 1. Extract the cosine similarity of the target class for each sample
+            cosine_clone = cosine.detach().clone()
+            target_cos = cosine_clone[torch.arange(cosine_clone.size(0)), label].unsqueeze(1)
+            # 2. Find the maximum cosine similarity of non-target classes for each sample
+            cosine_without_target = cosine_clone.masked_fill(
+                F.one_hot(label, num_classes=cosine_clone.size(1)).to(torch.bool), float('-inf')
+            )
+            max_non_target_cos, _ = cosine_without_target.max(dim=1, keepdim=True)
+            # 3. Compute the margin (gap) between target and highest non-target cosine
+            cosine_gap = target_cos - max_non_target_cos
+            inter = cosine_gap.detach()
+            intra = torch.exp(cosine_clone.max(dim=1, keepdim=True).values).detach()
+
+        one_hot = input.new_zeros(cosine.size())
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
+        
+        # Uncertainty scaling
+        epsion = 1e-6        
+        Lambda =-(cosine_gap).detach()+0.5
+        covariance_denominator = covariance+ Lambda + epsion
+        numerator = torch.sum(input * input, dim=1, keepdim=True) 
+        denominator = torch.sum(input * (covariance_denominator) * input + epsion, dim=1, keepdim=True) 
+        uncertainty_scale = (numerator / denominator)**0.5
+        output *= (uncertainty_scale * torch.exp(inter * intra))
+
+        output *= self.scale
+        return output
+
+    def extra_repr(self):
+        return '''in_features={}, out_features={}, scale={},
+                  margin={}, easy_margin={}'''.format(self.in_features,
+                                                      self.out_features,
+                                                      self.scale, self.margin,
+                                                      self.easy_margin)
+
 
 class ArcMarginProduct_intertopk_subcenter(nn.Module):
     r"""Implement of large margin arc distance with intertopk and subcenter:

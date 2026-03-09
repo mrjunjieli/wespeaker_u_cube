@@ -1,4 +1,6 @@
 
+💡This repository contains the implementations of three related papers on uncertainty-aware speaker recognition.
+
 # 1. $\mathcal{U}^3$-xi  Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
 
 
@@ -13,6 +15,9 @@
   </a>
   <img src="https://visitor-badge.laobi.icu/badge?page_id=mrjunjieli.wespeaker_u_cube"/>
   <img src="https://img.shields.io/github/stars/mrjunjieli/wespeaker_u_cube?style=social"/>
+</p>
+<p align="center">
+  Email: <a href="mailto:junjie98.li@connect.polyu.hk">junjie98.li@connect.polyu.hk</a>
 </p>
 
 
@@ -117,6 +122,26 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
   - [wespeaker/bin/score_calibration_uncertainty.py](wespeaker/bin/score_calibration_uncertain.py)
 
   
+# 3. Robust Speaker Recognition via Inter–Intra Aware Uncertainty Modeling and Test-Time Adaptation
+
+In this paper, we propose two new methods:
+- Inter-Intra Aware Uncertainty Modeling method
+- Test-Time Adaptation 
+
+This repro contains only the code of first method. 
+
+## 🚀Experiments: 
+- Inter-Intra Aware Uncertainty: [wespeaker/models/projections.py:ArcMarginProduct_uncertainty_inter_intra](wespeaker/models/projections.py#L430)
+
+## Pre-trained Models:
+- [Voxceleb2_ECAPA-TDNN-512_AM](https://drive.google.com/file/d/1m4rp2WOJbMitRLNYJK41D4r5HJczPmBJ/view?usp=sharing)
+- [Voxceleb2_ECAPA-TDNN-512_u_cube_AM+Inter-Intra](https://drive.google.com/file/d/1YJlAsVtFavhsv12BwpvVRVHRUsRYGNx8/view?usp=sharing)
+- [Voxceleb2_ECAPA-TDNN-512_u_cube_AAM+Inter-Intra](https://drive.google.com/file/d/17vrgCwdH9mROTV2_tePEdXjhlw3qZNjq/view?usp=sharing)
+
+--- 
+---
+---
+Below are original wespeaker's readme
 
 # WeSpeaker
 
