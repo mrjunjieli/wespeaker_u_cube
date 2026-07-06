@@ -116,7 +116,7 @@ def extract(config='conf/config.yaml', **kwargs):
                     features = spec_aug(features, **test_conf['spec_aug_args'])
 
                 B, T, F = features.shape
-                chunk_size = 10000
+                chunk_size = 5000
                 num_chunks = (T + chunk_size - 1) // chunk_size
 
                 embed_list = []

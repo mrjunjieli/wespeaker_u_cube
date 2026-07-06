@@ -34,12 +34,28 @@ def get_projection(conf):
                                       scale=conf['scale'],
                                       margin=0.0,
                                       easy_margin=conf['easy_margin'])
+    elif conf['project_type'] == 'add_margin_uncertainty':
+        projection = AddMarginProduct_uncertainty(conf['embed_dim'],
+                                                  conf['num_class'],
+                                                  scale=conf['scale'],
+                                                  margin=0.0)
+    elif conf['project_type'] == 'add_margin_uncertainty_inter_intra':
+        projection = AddMarginProduct_uncertainty_inter_intra(conf['embed_dim'],
+                                                              conf['num_class'],
+                                                              scale=conf['scale'],
+                                                              margin=0.0)
     elif conf['project_type'] == 'arc_margin_uncertainty':
         projection = ArcMarginProduct_uncertainty(conf['embed_dim'],
                                       conf['num_class'],
                                       scale=conf['scale'],
                                       margin=0.0,
                                       easy_margin=conf['easy_margin'])
+    elif conf['project_type'] == 'arc_margin_uncertainty_inter_intra':
+        projection = ArcMarginProduct_uncertainty_inter_intra(conf['embed_dim'],
+                                                              conf['num_class'],
+                                                              scale=conf['scale'],
+                                                              margin=0.0,
+                                                              easy_margin=conf['easy_margin'])
     elif conf['project_type'] == 'arc_margin_intertopk_subcenter':
         projection = ArcMarginProduct_intertopk_subcenter(
             conf['embed_dim'],
@@ -63,6 +79,14 @@ def get_projection(conf):
                                  t=conf.get('t', 3),
                                  lanbuda=conf.get('lanbuda', 0.7),
                                  margin_type=conf.get('margin_type', 'C'))
+    elif conf['project_type'] == 'sphereface2_uncertainty_arcguide':
+        projection = SphereFace2_uncertainty_Arcguide_inter_intra(conf['embed_dim'],
+                                                       conf['num_class'],
+                                                       scale=conf['scale'],
+                                                       margin=0.0,
+                                                       t=conf.get('t', 3),
+                                                       lanbuda=conf.get('lanbuda', 0.7),
+                                                       margin_type=conf.get('margin_type', 'C'))
     else:
         projection = Linear(conf['embed_dim'], conf['num_class'])
 
@@ -168,6 +192,143 @@ class SphereFace2(nn.Module):
     def extra_repr(self):
         return '''in_features={}, out_features={}, scale={}, lanbuda={},
                   margin={}, t={}, margin_type={}'''.format(
+            self.in_features, self.out_features, self.scale, self.lanbuda,
+            self.margin, self.t, self.margin_type)
+
+
+class SphereFace2_uncertainty_Arcguide_inter_intra(nn.Module):
+    r"""SphereFace2 with dynamic alpha scheduling and uncertainty-aware ArcFace guidance:
+        current_alpha is a plain attribute, set externally at epoch boundaries.
+        When current_alpha > 0, an Arc CE auxiliary loss with uncertainty
+        scaling is added: loss = sphereface2_loss + current_alpha * arc_ce_loss.
+    """
+
+    def __init__(self,
+                 in_features,
+                 out_features,
+                 scale=32.0,
+                 margin=0.2,
+                 lanbuda=0.7,
+                 t=3,
+                 margin_type='C'):
+        super(SphereFace2_uncertainty_Arcguide_inter_intra, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.scale = scale
+        self.weight = nn.Parameter(torch.FloatTensor(out_features,
+                                                     in_features))
+        nn.init.xavier_uniform_(self.weight)
+        self.bias = nn.Parameter(torch.zeros(1, 1))
+        self.t = t
+        self.lanbuda = lanbuda
+        self.margin_type = margin_type
+
+        # Dynamic alpha: set externally per epoch
+        self.current_alpha = 0.0
+
+        self.margin = margin
+        self.cos_m = math.cos(margin)
+        self.sin_m = math.sin(margin)
+        self.th = math.cos(math.pi - margin)
+        self.mm = math.sin(math.pi - margin)
+        self.mmm = 1.0 + math.cos(math.pi - margin)
+
+    def update(self, margin=0.2, **kwargs):
+        self.margin = margin
+        self.cos_m = math.cos(margin)
+        self.sin_m = math.sin(margin)
+        self.th = math.cos(math.pi - margin)
+        self.mm = math.sin(math.pi - margin)
+        self.mmm = 1.0 + math.cos(math.pi - margin)
+
+    def fun_g(self, z, t: int):
+        base = (z + 1.0) / 2.0
+        base = base.clamp(min=1e-8)
+        gz = 2.0 * torch.pow(base, t) - 1.0
+        return gz
+
+    def forward(self, input, covariance, label):
+        cos = F.linear(F.normalize(input), F.normalize(self.weight))
+        cos = cos.clamp(-1.0 + 1e-6, 1.0 - 1e-6)
+        sin = torch.sqrt(1.0 - cos.pow(2))
+
+        target_mask = input.new_zeros(cos.size())
+        target_mask.scatter_(1, label.view(-1, 1).long(), 1.0)
+        nontarget_mask = 1.0 - target_mask
+
+        # ========== Uncertainty-aware scale (applied to SphereFace2 logits) ==========
+        with torch.no_grad():
+            cosine_clone = cos.detach().clone()
+            target_cos = cosine_clone[torch.arange(
+                cosine_clone.size(0)), label].unsqueeze(1)
+            one_hot_mask = F.one_hot(
+                label.long(),
+                num_classes=cosine_clone.size(1)).to(torch.bool)
+            cosine_without_target = cosine_clone.masked_fill(
+                one_hot_mask, float('-inf'))
+            max_non_target_cos, _ = cosine_without_target.max(
+                dim=1, keepdim=True)
+            cosine_gap = target_cos - max_non_target_cos
+
+        Lambda = (-cosine_gap + 1.2).clamp(min=0.0)
+        eps = 1e-6
+        cov_denom = (covariance + Lambda + eps).clamp(min=0.9)
+        numerator = torch.sum(input * input, dim=1, keepdim=True)
+        denominator = torch.sum(
+            input * cov_denom * input + eps, dim=1, keepdim=True)
+        uncertainty_scale = (numerator / denominator).sqrt()
+
+        # ========== SphereFace2 main loss (original scale, no uncertainty) ==========
+        if self.margin_type == 'A':
+            cos_m_theta = cos * self.cos_m - sin * self.sin_m
+            cos_m_theta = torch.where(cos > self.th, cos_m_theta,
+                                      cos - self.mmm)
+            cos_m_theta_p = self.scale * self.fun_g(
+                cos_m_theta, self.t) + self.bias[0][0]
+            cos_m_theta_n = self.scale * self.fun_g(
+                cos * self.cos_m + sin * self.sin_m, self.t) + self.bias[0][0]
+        else:
+            cos_m_theta_p = self.scale * (self.fun_g(cos, self.t) -
+                                          self.margin) + self.bias[0][0]
+            cos_m_theta_n = self.scale * (self.fun_g(cos, self.t) +
+                                          self.margin) + self.bias[0][0]
+
+        cos_p_loss = self.lanbuda * F.softplus(-cos_m_theta_p)
+        cos_n_loss = (1.0 - self.lanbuda) * F.softplus(cos_m_theta_n)
+
+        sphereface2_loss = (target_mask * cos_p_loss +
+                            nontarget_mask * cos_n_loss).sum(1).mean()
+
+        # ========== Arc CE auxiliary loss with uncertainty (controlled by current_alpha) ==========
+        if self.current_alpha > 0:
+            phi = cos * self.cos_m - sin * self.sin_m
+            phi = torch.where(cos > self.th, phi, cos - self.mmm)
+            arc_output = (target_mask * phi) + (nontarget_mask * cos)
+
+            with torch.no_grad():
+                inter = cosine_gap.detach()
+                intra = torch.exp(
+                    cosine_clone.max(dim=1, keepdim=True).values).detach()
+
+            arc_output = arc_output * uncertainty_scale * torch.exp(
+                inter * intra)
+            arc_logits = self.scale * arc_output
+            arc_ce_loss = F.cross_entropy(arc_logits, label.long())
+        else:
+            arc_ce_loss = torch.tensor(0.0, device=input.device)
+
+        # ========== Total loss ==========
+        loss = sphereface2_loss + self.current_alpha * arc_ce_loss
+
+        # Output for accuracy computation
+        cos1 = (cos - self.margin) * target_mask + cos * nontarget_mask
+        output = self.scale * cos1
+
+        return output, loss
+
+    def extra_repr(self):
+        return ('in_features={}, out_features={}, scale={}, lanbuda={}, '
+                'margin={}, t={}, margin_type={}').format(
             self.in_features, self.out_features, self.scale, self.lanbuda,
             self.margin, self.t, self.margin_type)
 
@@ -597,6 +758,134 @@ class AddMarginProduct(nn.Module):
         one_hot = input.new_zeros(cosine.size())
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
+        output *= self.scale
+        return output
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(' \
+            + 'in_features=' + str(self.in_features) \
+            + ', out_features=' + str(self.out_features) \
+            + ', scale=' + str(self.scale) \
+            + ', margin=' + str(self.margin) + ')'
+
+
+class AddMarginProduct_uncertainty(nn.Module):
+    r"""Implement of large margin cosine distance with uncertainty scaling:
+    Args:
+        in_features: size of each input sample
+        out_features: size of each output sample
+        scale: norm of input feature
+        margin: margin
+        cos(theta) - margin
+    """
+
+    def __init__(self, in_features, out_features, scale=32.0, margin=0.20):
+        super(AddMarginProduct_uncertainty, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.scale = scale
+        self.margin = margin
+        self.weight = nn.Parameter(torch.FloatTensor(out_features,
+                                                     in_features))
+        nn.init.xavier_uniform_(self.weight)
+
+    def update(self, margin):
+        self.margin = margin
+
+    def forward(self, input, covariance, label):
+        # ---------------- cos(theta) & phi(theta) ---------------
+        cosine = F.linear(F.normalize(input), F.normalize(self.weight))
+        phi = cosine - self.margin
+
+        # Compute cosine gap for uncertainty scaling
+        with torch.no_grad():
+            cosine_clone = cosine.detach().clone()
+            target_cos = cosine_clone[torch.arange(cosine_clone.size(0)), label].unsqueeze(1)
+            cosine_without_target = cosine_clone.masked_fill(
+                F.one_hot(label, num_classes=cosine_clone.size(1)).to(torch.bool), float('-inf')
+            )
+            max_non_target_cos, _ = cosine_without_target.max(dim=1, keepdim=True)
+            cosine_gap = target_cos - max_non_target_cos
+
+        # ---------------- convert label to one-hot ---------------
+        one_hot = input.new_zeros(cosine.size())
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
+
+        # Uncertainty scaling
+        epsion = 1e-6
+        Lambda = -(cosine_gap).detach() + 0.5
+        covariance_denominator = covariance + Lambda + epsion
+        numerator = torch.sum(input * input, dim=1, keepdim=True)
+        denominator = torch.sum(input * (covariance_denominator) * input + epsion, dim=1, keepdim=True)
+        uncertainty_scale = (numerator / denominator)**0.5
+        output *= uncertainty_scale
+
+        output *= self.scale
+        return output
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(' \
+            + 'in_features=' + str(self.in_features) \
+            + ', out_features=' + str(self.out_features) \
+            + ', scale=' + str(self.scale) \
+            + ', margin=' + str(self.margin) + ')'
+
+
+class AddMarginProduct_uncertainty_inter_intra(nn.Module):
+    r"""Implement of large margin cosine distance with inter-intra uncertainty scaling:
+    Args:
+        in_features: size of each input sample
+        out_features: size of each output sample
+        scale: norm of input feature
+        margin: margin
+        cos(theta) - margin
+    """
+
+    def __init__(self, in_features, out_features, scale=32.0, margin=0.20):
+        super(AddMarginProduct_uncertainty_inter_intra, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.scale = scale
+        self.margin = margin
+        self.weight = nn.Parameter(torch.FloatTensor(out_features,
+                                                     in_features))
+        nn.init.xavier_uniform_(self.weight)
+
+    def update(self, margin):
+        self.margin = margin
+
+    def forward(self, input, covariance, label):
+        # ---------------- cos(theta) & phi(theta) ---------------
+        cosine = F.linear(F.normalize(input), F.normalize(self.weight))
+        phi = cosine - self.margin
+
+        # Compute cosine gap and inter/intra for uncertainty scaling
+        with torch.no_grad():
+            cosine_clone = cosine.detach().clone()
+            target_cos = cosine_clone[torch.arange(cosine_clone.size(0)), label].unsqueeze(1)
+            cosine_without_target = cosine_clone.masked_fill(
+                F.one_hot(label, num_classes=cosine_clone.size(1)).to(torch.bool), float('-inf')
+            )
+            max_non_target_cos, _ = cosine_without_target.max(dim=1, keepdim=True)
+            cosine_gap = target_cos - max_non_target_cos
+            inter = cosine_gap.detach()
+            intra = torch.exp(cosine_clone.max(dim=1, keepdim=True).values).detach()
+
+        # ---------------- convert label to one-hot ---------------
+        one_hot = input.new_zeros(cosine.size())
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
+
+        # Uncertainty scaling
+        epsion = 1e-6
+        Lambda = -(cosine_gap).detach() + 0.5
+        covariance_denominator = covariance + Lambda + epsion
+        numerator = torch.sum(input * input, dim=1, keepdim=True)
+        denominator = torch.sum(input * (covariance_denominator) * input + epsion, dim=1, keepdim=True)
+        uncertainty_scale = (numerator / denominator)**0.5
+        output *= (uncertainty_scale * torch.exp(inter * intra))
+
         output *= self.scale
         return output
 

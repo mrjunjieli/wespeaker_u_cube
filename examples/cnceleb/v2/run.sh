@@ -10,8 +10,8 @@
 # multi-node + multi-gpus:
 #   bash run.sh --stage 3 --stop-stage 3 --HOST_NODE_ADDR "xxx.xxx.xxx.xxx:port" --num_nodes num_node
 
-stage=-1
-stop_stage=-1
+stage=5
+stop_stage=5
 
 HOST_NODE_ADDR="localhost:29400"
 num_nodes=1
@@ -20,13 +20,14 @@ job_id=2024
 data=data
 data_type="shard"  # shard/raw
 
-config=conf/resnet.yaml
-exp_dir=exp/ResNet34-TSTP-emb256-fbank80-num_frms200-aug0.6-spTrue-saFalse-ArcMargin-SGD-epoch150
-gpus="[0,1]"
+# config=conf/resnet.yaml/
+exp_dir=/home/junjie/official_github/wespeaker_u_cube/examples/voxceleb/v2/exp/redimnet_u_cube_UAAM_inter_intra
+gpus="[2,3]"
 num_avg=10
 checkpoint=
 
-trials="CNC-Eval-Concat.lst CNC-Eval-Avg.lst"
+# trials="CNC-Eval-Concat.lst CNC-Eval-Avg.lst"/
+trials='CNC-Eval-Avg.lst'
 score_norm_method="asnorm"  # asnorm/snorm
 top_n=300
 
@@ -98,14 +99,25 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   fi
 
   echo "Extract embeddings ..."
-  local/extract_cnc.sh \
+  # local/extract_cnc.sh \
+  #   --exp_dir $exp_dir --model_path $model_path \
+  #   --nj 2 --gpus $gpus --data_type $data_type --data ${data}
+  
+  
+  local/extract_cnc_uncertainty.sh \
     --exp_dir $exp_dir --model_path $model_path \
-    --nj 4 --gpus $gpus --data_type $data_type --data ${data}
+    --nj 2 --gpus $gpus --data_type $data_type --data ${data}
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   echo "Score ..."
   local/score.sh \
+    --stage 1 --stop-stage 2 \
+    --exp_dir $exp_dir \
+    --data ${data} \
+    --trials "$trials"
+
+  local/score_uncertainty.sh \
     --stage 1 --stop-stage 2 \
     --exp_dir $exp_dir \
     --data ${data} \

@@ -228,6 +228,19 @@ def train(config='conf/config.yaml', **kwargs):
     for epoch in range(start_epoch, configs['num_epochs'] + 1):
         train_dataset.set_epoch(epoch)
 
+        # alpha scheduling for sphereface2_uncertainty_arcguide
+        if hasattr(model.projection, 'current_alpha'):
+            alpha_conf = configs.get('alpha_schedule', {})
+            alpha_final = alpha_conf.get('alpha_final', 0.3)
+            ws = alpha_conf.get('alpha_warmup_start', 60)
+            we = alpha_conf.get('alpha_warmup_end', 140)
+            if epoch < ws:
+                model.projection.current_alpha = 0.0
+            elif epoch >= we:
+                model.projection.current_alpha = alpha_final
+            else:
+                model.projection.current_alpha = alpha_final * (epoch - ws) / max(1, we - ws)
+
         run_epoch(train_dataloader,
                   epoch_iter,
                   ddp_model,

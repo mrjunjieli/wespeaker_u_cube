@@ -122,16 +122,369 @@ Our experiments are located in the [`examples/voxceleb/v2`](examples/voxceleb/v2
   - [wespeaker/bin/score_calibration_uncertainty.py](wespeaker/bin/score_calibration_uncertain.py)
 
   
-# 3. Robust Speaker Recognition via Inter–Intra Aware Uncertainty Modeling and Test-Time Adaptation
+# 3. Towards Robust Uncertainty-Aware Speaker Modeling
 
 In this paper, we propose two new methods:
-- Inter-Intra Aware Uncertainty Modeling method
-- Test-Time Adaptation 
+- Inter- and Intra-Speaker-Aware Uncertainty Softmax
+- Uncertainty-Calibrated Domain Adaptation (UCDA)
 
 This repro contains only the code of first method. 
 
 ## 🚀Experiments: 
-- Inter-Intra Aware Uncertainty: [wespeaker/models/projections.py:ArcMarginProduct_uncertainty_inter_intra](wespeaker/models/projections.py#L430)
+- Inter- and Intra-Speaker-Aware Uncertainty Softmax (UAAM Softmax Inter-intra):[wespeaker/models/projections.py:ArcMarginProduct_uncertainty_inter_intra](wespeaker/models/projections.py#L500) 
+- Inter- and Intra-Speaker-Aware Uncertainty Softmax (USphereFace2 Inter-intra):[wespeaker/models/projections.py:SphereFace2_uncertainty_Arcguide](wespeaker/models/projections.py#L193) 
+- Inter- and Intra-Speaker-Aware Uncertainty Softmax (UAM Softmax Inter-intra):[wespeaker/models/projections.py:AddMarginProduct_uncertainty_inter_intra](wespeaker/models/projections.py#L829) 
+
+
+## Results: 
+
+<table style="border-collapse: collapse; border-top: 3px solid #000; border-bottom: 3px solid #000;">
+  <thead>
+    <tr>
+      <th rowspan="2">Model</th>
+      <th rowspan="2"># Param.</th>
+      <th rowspan="2">Loss</th>
+      <th rowspan="2">Uncertainty-aware cosine score</th>
+      <th colspan="7">In-domain</th>
+      <th colspan="3">Cross-domain</th>
+    </tr>
+    <tr>
+      <th colspan="2">Vox1-O</th>
+      <th colspan="2">Vox1-E</th>
+      <th colspan="2">Vox1-H</th>
+      <th rowspan="2">RI (%)</th>
+      <th colspan="2">CNCeleb</th>
+      <th rowspan="2">RI (%)</th>
+    </tr>
+    <tr>
+      <th colspan="4"></th>
+      <th>EER</th>
+      <th>minDCF</th>
+      <th>EER</th>
+      <th>minDCF</th>
+      <th>EER</th>
+      <th>minDCF</th>
+      <th>EER</th>
+      <th>minDCF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top: 3px solid #000;">
+      <td>ECAPA512</td>
+      <td>6.19 M</td>
+      <td>AAM-Softmax</td>
+      <td>No</td>
+      <td>1.069</td>
+      <td>0.122</td>
+      <td>1.209</td>
+      <td>0.136</td>
+      <td>2.310</td>
+      <td>0.226</td>
+      <td>Benchmark</td>
+      <td>15.314</td>
+      <td>0.633</td>
+      <td>Benchmark</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ECAPA512+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">6.69 M</td>
+      <td rowspan="2">UAAM-Softmax</td>
+      <td>No</td>
+      <td>0.856</td>
+      <td>0.109</td>
+      <td>1.064</td>
+      <td>0.121</td>
+      <td>1.982</td>
+      <td>0.195</td>
+      <td>13.57</td>
+      <td>13.706</td>
+      <td>0.608</td>
+      <td>7.23</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td>0.782</td>
+      <td>0.100</td>
+      <td>1.016</td>
+      <td>0.115</td>
+      <td>1.888</td>
+      <td>0.187</td>
+      <td>18.64</td>
+      <td>10.271</td>
+      <td>1.000</td>
+      <td>-12.52</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ECAPA512+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">6.69 M</td>
+      <td rowspan="2">UAAM-Softmax inter-intra</td>
+      <td>No</td>
+      <td>0.936</td>
+      <td>0.102</td>
+      <td>1.050</td>
+      <td>0.122</td>
+      <td>1.978</td>
+      <td>0.195</td>
+      <td>13.40</td>
+      <td>13.974</td>
+      <td>0.581</td>
+      <td>8.48</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td>0.840</td>
+      <td>0.086</td>
+      <td><strong>0.965</strong></td>
+      <td>0.110</td>
+      <td>1.833</td>
+      <td>0.189</td>
+      <td>21.22</td>
+      <td>10.781</td>
+      <td>0.835</td>
+      <td>-1.16</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td>ECAPA512</td>
+      <td>6.19 M</td>
+      <td>AM-Softmax</td>
+      <td>No</td>
+      <td>1.005</td>
+      <td>0.107</td>
+      <td>1.206</td>
+      <td>0.133</td>
+      <td>2.254</td>
+      <td>0.221</td>
+      <td>Benchmark</td>
+      <td>14.162</td>
+      <td>0.611</td>
+      <td>Benchmark</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ECAPA512+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">6.69 M</td>
+      <td rowspan="2">UAM-Softmax inter-intra</td>
+      <td>No</td>
+      <td>0.888</td>
+      <td>0.099</td>
+      <td>1.076</td>
+      <td>0.119</td>
+      <td>1.973</td>
+      <td>0.186</td>
+      <td>11.46</td>
+      <td>12.436</td>
+      <td>0.553</td>
+      <td>10.84</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td>0.808</td>
+      <td><strong>0.084</strong></td>
+      <td>0.991</td>
+      <td>0.109</td>
+      <td>1.794</td>
+      <td><strong>0.178</strong></td>
+      <td>19.46</td>
+      <td><strong>9.411</strong></td>
+      <td>1.000</td>
+      <td>-15.03</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td>ECAPA512</td>
+      <td>6.19 M</td>
+      <td>SphereFace2</td>
+      <td>No</td>
+      <td>0.963</td>
+      <td>0.108</td>
+      <td>1.121</td>
+      <td>0.125</td>
+      <td>1.967</td>
+      <td>0.199</td>
+      <td>Benchmark</td>
+      <td>12.582</td>
+      <td>0.573</td>
+      <td>Benchmark</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ECAPA512+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">6.69 M</td>
+      <td rowspan="2">USphereFace2 inter-intra</td>
+      <td>No</td>
+      <td>0.856</td>
+      <td>0.104</td>
+      <td>1.035</td>
+      <td>0.119</td>
+      <td>1.918</td>
+      <td>0.196</td>
+      <td>5.21</td>
+      <td>12.265</td>
+      <td><strong>0.550</strong></td>
+      <td>3.27</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td><strong>0.739</strong></td>
+      <td>0.102</td>
+      <td><strong>0.965</strong></td>
+      <td><strong>0.108</strong></td>
+      <td><strong>1.771</strong></td>
+      <td><strong>0.178</strong></td>
+      <td>12.81</td>
+      <td>10.560</td>
+      <td>0.624</td>
+      <td>3.59</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td>ResNet34</td>
+      <td>6.63 M</td>
+      <td>AAM-Softmax</td>
+      <td>No</td>
+      <td><strong>0.867</strong></td>
+      <td>0.091</td>
+      <td>1.049</td>
+      <td>0.121</td>
+      <td>1.960</td>
+      <td>0.192</td>
+      <td>Benchmark</td>
+      <td>11.090</td>
+      <td><strong>0.488</strong></td>
+      <td>Benchmark</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ResNet34+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">7.92 M</td>
+      <td rowspan="2">UAAM-Softmax</td>
+      <td>No</td>
+      <td>0.888</td>
+      <td>0.085</td>
+      <td>0.900</td>
+      <td>0.099</td>
+      <td>1.712</td>
+      <td>0.175</td>
+      <td>9.68</td>
+      <td>11.732</td>
+      <td>0.513</td>
+      <td>-5.46</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td><strong>0.867</strong></td>
+      <td><strong>0.078</strong></td>
+      <td><strong>0.868</strong></td>
+      <td><strong>0.095</strong></td>
+      <td><strong>1.641</strong></td>
+      <td><strong>0.172</strong></td>
+      <td>13.29</td>
+      <td><strong>10.082</strong></td>
+      <td>0.541</td>
+      <td>-0.89</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ResNet34+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">7.92 M</td>
+      <td rowspan="2">USphereFace2 inter-intra</td>
+      <td>No</td>
+      <td>1.483</td>
+      <td>0.148</td>
+      <td>1.451</td>
+      <td>0.156</td>
+      <td>2.112</td>
+      <td>0.206</td>
+      <td>-36.00</td>
+      <td>11.441</td>
+      <td>0.512</td>
+      <td>-4.04</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td>1.340</td>
+      <td>0.156</td>
+      <td>1.357</td>
+      <td>0.150</td>
+      <td>1.986</td>
+      <td>0.193</td>
+      <td>-30.19</td>
+      <td>10.949</td>
+      <td>0.499</td>
+      <td>-0.49</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td>ReDimNet-B2</td>
+      <td>5.46 M</td>
+      <td>AAM-Softmax</td>
+      <td>No</td>
+      <td>0.782</td>
+      <td>0.064</td>
+      <td>0.907</td>
+      <td>0.097</td>
+      <td>1.667</td>
+      <td>0.162</td>
+      <td>Benchmark</td>
+      <td>12.385</td>
+      <td>0.552</td>
+      <td>Benchmark</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ReDimNet-B2+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">5.46 M</td>
+      <td rowspan="2">UAAM-Softmax</td>
+      <td>No</td>
+      <td>0.649</td>
+      <td>0.073</td>
+      <td>0.801</td>
+      <td>0.089</td>
+      <td>1.532</td>
+      <td>0.153</td>
+      <td>6.09</td>
+      <td>13.464</td>
+      <td>0.552</td>
+      <td>-4.36</td>
+    </tr>
+    <tr>
+      <td>Yes</td>
+      <td><strong>0.606</strong></td>
+      <td>0.065</td>
+      <td>0.779</td>
+      <td>0.091</td>
+      <td>1.494</td>
+      <td>0.157</td>
+      <td>9.12</td>
+      <td><strong>9.479</strong></td>
+      <td>1.000</td>
+      <td>-28.85</td>
+    </tr>
+    <tr style="border-top: 3px solid #000;">
+      <td rowspan="2">ReDimNet-B2+$\mathcal{U}^3$-xi</td>
+      <td rowspan="2">4.89 M</td>
+      <td rowspan="2">USphereFace2 inter-intra</td>
+      <td>No</td>
+      <td>0.622</td>
+      <td>0.052</td>
+      <td>0.776</td>
+      <td>0.085</td>
+      <td>1.440</td>
+      <td>0.146</td>
+      <td>14.92</td>
+      <td>12.081</td>
+      <td>0.515</td>
+      <td>4.58</td>
+    </tr>
+    <tr style="border-bottom: 3px solid #000;">
+      <td>Yes</td>
+      <td>0.622</td>
+      <td><strong>0.051</strong></td>
+      <td><strong>0.774</strong></td>
+      <td><strong>0.084</strong></td>
+      <td><strong>1.433</strong></td>
+      <td><strong>0.145</strong></td>
+      <td>15.56</td>
+      <td>11.899</td>
+      <td><strong>0.506</strong></td>
+      <td>6.13</td>
+    </tr>
+  </tbody>
+</table>
+
+
 
 ## Pre-trained Models:
 - [Voxceleb2_ECAPA-TDNN-512_AM](https://drive.google.com/file/d/1m4rp2WOJbMitRLNYJK41D4r5HJczPmBJ/view?usp=sharing)

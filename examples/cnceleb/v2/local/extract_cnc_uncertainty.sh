@@ -1,8 +1,6 @@
 #!/bin/bash
-# coding:utf-8
 
 # Copyright (c) 2022 Hongji Wang (jijijiang77@gmail.com)
-#               2022 Chengdong Liang (liangchengdong@mail.nwpu.edu.cn)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +34,7 @@ count=${#data_name_array[@]}
 
 for i in $(seq 1 $(($count - 1))); do
   wavs_num=$(wc -l ${data_scp_path_array[$i]} | awk '{print $1}')
-  bash tools/extract_embedding.sh --exp_dir ${exp_dir} \
+  bash tools/extract_embedding_uncertainty.sh --exp_dir ${exp_dir} \
     --model_path $model_path \
     --data_type ${data_type} \
     --data_list ${data_list_path_array[$i]} \
@@ -48,9 +46,10 @@ for i in $(seq 1 $(($count - 1))); do
     --gpus $gpus &
 done
 
+echo "Embedding dir is (${exp_dir}/embeddings)."
+
 wait
 
-echo "Embedding dir is (${exp_dir}/embeddings)."
 
 echo "mean vector of enroll"
 python tools/vector_mean.py \
@@ -59,3 +58,14 @@ python tools/vector_mean.py \
   --spk_xvector_ark $exp_dir/embeddings/eval/enroll_spk_xvector.ark
 
 cat $exp_dir/embeddings/eval/enroll_spk_xvector.scp >> $exp_dir/embeddings/eval/xvector.scp
+
+wait
+
+
+echo "mean variance of enroll"
+python tools/variance_mean.py \
+  --spk2utt ${data}/eval/enroll.map \
+  --xvector_scp $exp_dir/embeddings/eval/xvector_variance.scp \
+  --spk_xvector_ark $exp_dir/embeddings/eval/enroll_spk_variance.ark
+
+cat $exp_dir/embeddings/eval/enroll_spk_variance.scp >> $exp_dir/embeddings/eval/xvector_variance.scp

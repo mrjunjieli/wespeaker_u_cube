@@ -9,7 +9,7 @@ save_epoch_interval: 5 # save model every 5 epochs
 log_batch_interval: 100 # log every 100 batchs
 
 dataloader_args:
-  batch_size: 256
+  batch_size: 32
   num_workers: 12
   pin_memory: false
   prefetch_factor: 4
@@ -43,7 +43,7 @@ dataset_args:
     max_f: 8
     prob: 0.6
 
-model: ReDimNetB2
+model: ReDimNetB6
 model_init: null
 model_args:
   feat_dim: 72
@@ -53,7 +53,7 @@ model_args:
 
 
 projection_args:
-  project_type: "arc_margin_uncertainty" # add_margin, arc_margin, sphere, sphereface2, softmax, arc_margin_intertopk_subcenter
+  project_type: "sphereface2_uncertainty_arcguide" # add_margin, arc_margin,  arc_margin_uncertainty_inter_intra,  sphere, sphereface2, softmax, sphereface2_uncertainty_arcguide
   scale: 32.0
   easy_margin: False
 

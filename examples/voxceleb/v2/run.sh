@@ -8,8 +8,8 @@
 # multi-node + multi-gpus:
 #   bash run.sh --stage 3 --stop-stage 3 --HOST_NODE_ADDR "xxx.xxx.xxx.xxx:port" --num_nodes num_node
 
-stage=7
-stop_stage=7
+stage=3
+stop_stage=3
 
 HOST_NODE_ADDR="localhost:29400"
 num_nodes=1
@@ -18,9 +18,8 @@ job_id=2024
 data=data
 data_type="shard"  # shard/raw
 
-config=conf/ecapa_tdnn_u_cube.yaml
-# exp_dir=exp/ecapa_tdnn_u_cube
-exp_dir=exp/ECAPA_TDNN-512-U_CUBE-emb192-ArcMargin-SGD-epoch150-clamp_range15
+config=conf/redimnet_u_cube.yaml
+exp_dir=exp/redimnet_B6_u_cube_USphereface2_inter_intra
 gpus="[2,3]"
 num_avg=10
 checkpoint=
