@@ -18,8 +18,8 @@ job_id=2024
 data=data
 data_type="shard"  # shard/raw
 
-config=conf/redimnet_u_cube.yaml
-exp_dir=exp/redimnet_B6_u_cube_USphereface2_inter_intra
+config=conf/ecapa_tdnn_u_cube.yaml
+exp_dir=exp/ecapa_tdnn_u_cube_AAM
 gpus="[2,3]"
 num_avg=10
 checkpoint=

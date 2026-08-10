@@ -88,53 +88,11 @@ The following models were re-trained. Therefore, results obtained from these che
 - [Voxceleb2_Xi-ECAPA-TDNN-512](https://drive.google.com/file/d/1Aw1qPe_oQkjDnFjYunCq5-KXIga3J1r6/view?usp=sharing)
 
 
-
-# 2. Uncertainty Score Normalization and Calibration for Speaker Verification
-
-<p align="center">
-  <a href="https://arxiv.org/abs/2601.15719">
-    <img src="https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg"/>
-  </a>
-</p>
-
-This section describes the implementation of  
-**"Uncertainty Score Normalization and Calibration for Speaker Verification."**
-
-We introduce three main components:
-
-- **Uncertainty-aware cosine scoring**
-- **UAS-Norm**: Uncertainty-Aware AS-Norm
-- **UQMFs**: Uncertainty-Aware Quality Measure Functions
-
-## 🚀 Experiments
-
-Our experiments are located in the [examples/voxceleb/v2](examples/voxceleb/v2) directory.
-
-- **Uncertainty extraction**
-  - [local/extract_vox_uncertainty.sh](examples/voxceleb/v2/local/extract_vox_uncertainty.sh)
-  - [tools/extract_embedding_uncertainty.sh](examples/voxceleb/v2/tools/extract_embedding_uncertainty.sh)
-  - [wespeaker/bin/extract_uncertainty.py](wespeaker/bin/extract_uncertainty.py)
-
-- **Uncertainty-aware cosine scoring**
-  - [local/score_uncertainty.sh](examples/voxceleb/v2/local/score_uncertainty.sh)
-  - [wespeaker/bin/score_uncertainty.py](wespeaker/bin/score_uncertainty.py)
-
-- **Uncertainty-aware AS-Norm**: uncertainty-aware cosine scoring + uncertainty-aware AS-Norm
-  - [local/score_norm_uncertainty.sh](examples/voxceleb/v2/local/score_norm_uncertainty.sh)
-  - [variance_mean.py](examples/voxceleb/v2/tools/variance_mean.py)
-  - [wespeaker/bin/score_norm_uncertainty.py](wespeaker/bin/score_norm_uncertainty.py)
-
-- **Uncertainty-aware QMFs**: uncertainty-aware cosine scoring + uncertainty-aware AS-Norm + uncertainty-aware QMFs
-  - [local/score_calibration_uncertainty.sh](examples/voxceleb/v2/local/score_calibration_uncertainty.sh)
-  - [wespeaker/bin/score_norm_forvox2.py](wespeaker/bin/score_norm_forvox2.py)
-  - [wespeaker/bin/score_calibration_uncertain.py](wespeaker/bin/score_calibration_uncertain.py)
-
-  
-# 3. Towards Robust Uncertainty-Aware Speaker Modeling
+# 2. Towards Robust Uncertainty-Aware Speaker Modeling
 
 <p align="center">
-  <a href="">
-    <img src="https://img.shields.io/badge/arXiv-TBD-b31b1b.svg"/>
+  <a href="https://arxiv.org/abs/2607.04937">
+    <img src="https://img.shields.io/badge/arXiv-2607.04937-b31b1b.svg"/>
   </a>
 </p>
 
@@ -189,366 +147,76 @@ In this work, we propose two uncertainty-aware speaker modeling methods:
     </tr>
   </thead>
   <tbody>
-    <tr style="border-top: 3px solid #000;">
-      <td>ECAPA512</td>
-      <td>6.19 M</td>
-      <td>AAM-Softmax</td>
-      <td>No</td>
-      <td>1.069</td>
-      <td>0.122</td>
-      <td>1.209</td>
-      <td>0.136</td>
-      <td>2.310</td>
-      <td>0.226</td>
-      <td>Benchmark</td>
-      <td>15.314</td>
-      <td>0.633</td>
-      <td>Benchmark</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="4">ECAPA512+U<sup>3</sup>-xi</td>
-      <td rowspan="4">6.69 M</td>
-      <td rowspan="2">UAAM-Softmax</td>
-      <td>No</td>
-      <td>0.856</td>
-      <td>0.109</td>
-      <td>1.064</td>
-      <td>0.121</td>
-      <td>1.982</td>
-      <td>0.195</td>
-      <td>13.57</td>
-      <td>13.706</td>
-      <td>0.608</td>
-      <td>7.23</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>0.782</td>
-      <td>0.100</td>
-      <td>1.016</td>
-      <td>0.115</td>
-      <td>1.888</td>
-      <td>0.187</td>
-      <td>18.64</td>
-      <td>10.271</td>
-      <td>1.000</td>
-      <td>-12.52</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2"><a href="https://drive.google.com/drive/folders/1PcI8UM5blXePt2ZCnyNycnj0co5a2XLa?usp=sharing">UAAM-Softmax inter-intra</a></td>
-      <td>No</td>
-      <td>0.936</td>
-      <td>0.102</td>
-      <td>1.050</td>
-      <td>0.122</td>
-      <td>1.978</td>
-      <td>0.195</td>
-      <td>13.40</td>
-      <td>13.974</td>
-      <td>0.581</td>
-      <td>8.48</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>0.840</td>
-      <td>0.086</td>
-      <td><strong>0.965</strong></td>
-      <td>0.110</td>
-      <td>1.833</td>
-      <td>0.189</td>
-      <td>21.22</td>
-      <td>10.781</td>
-      <td>0.835</td>
-      <td>-1.16</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>ECAPA512</td>
-      <td>6.19 M</td>
-      <td>AM-Softmax</td>
-      <td>No</td>
-      <td>1.005</td>
-      <td>0.107</td>
-      <td>1.206</td>
-      <td>0.133</td>
-      <td>2.254</td>
-      <td>0.221</td>
-      <td>Benchmark</td>
-      <td>14.162</td>
-      <td>0.611</td>
-      <td>Benchmark</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2">ECAPA512+U<sup>3</sup>-xi</td>
-      <td rowspan="2">6.69 M</td>
-      <td rowspan="2"><a href="https://drive.google.com/drive/folders/1t9SOt2XlNk4RGV8Q5TfEjZb2iUltIWJl?usp=sharing">UAM-Softmax inter-intra</a></td>
-      <td>No</td>
-      <td>0.888</td>
-      <td>0.099</td>
-      <td>1.076</td>
-      <td>0.119</td>
-      <td>1.973</td>
-      <td>0.186</td>
-      <td>11.46</td>
-      <td>12.436</td>
-      <td>0.553</td>
-      <td>10.84</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>0.808</td>
-      <td><strong>0.084</strong></td>
-      <td>0.991</td>
-      <td>0.109</td>
-      <td>1.794</td>
-      <td><strong>0.178</strong></td>
-      <td>19.46</td>
-      <td><strong>9.411</strong></td>
-      <td>1.000</td>
-      <td>-15.03</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>ECAPA512</td>
-      <td>6.19 M</td>
-      <td>SphereFace2</td>
-      <td>No</td>
-      <td>0.963</td>
-      <td>0.108</td>
-      <td>1.121</td>
-      <td>0.125</td>
-      <td>1.967</td>
-      <td>0.199</td>
-      <td>Benchmark</td>
-      <td>12.582</td>
-      <td>0.573</td>
-      <td>Benchmark</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2">ECAPA512+U<sup>3</sup>-xi</td>
-      <td rowspan="2">6.69 M</td>
-      <td rowspan="2"><a href="https://drive.google.com/drive/folders/1Luy6GQ7OBWhdbfTkLcgSN7QV4bz2dl0W?usp=sharing">USphereFace2 inter-intra</a></td>
-      <td>No</td>
-      <td>0.856</td>
-      <td>0.104</td>
-      <td>1.035</td>
-      <td>0.119</td>
-      <td>1.918</td>
-      <td>0.196</td>
-      <td>5.21</td>
-      <td>12.265</td>
-      <td><strong>0.550</strong></td>
-      <td>3.27</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td><strong>0.739</strong></td>
-      <td>0.102</td>
-      <td><strong>0.965</strong></td>
-      <td><strong>0.108</strong></td>
-      <td><strong>1.771</strong></td>
-      <td><strong>0.178</strong></td>
-      <td>12.81</td>
-      <td>10.560</td>
-      <td>0.624</td>
-      <td>3.59</td>
-    </tr>
-    <tr style="border-top: 6px double #000;">
-      <td>ResNet34</td>
-      <td>6.63 M</td>
-      <td>AAM-Softmax</td>
-      <td>No</td>
-      <td>0.867</td>
-      <td>0.091</td>
-      <td>1.049</td>
-      <td>0.121</td>
-      <td>1.960</td>
-      <td>0.192</td>
-      <td>Benchmark</td>
-      <td>11.090</td>
-      <td><strong>0.488</strong></td>
-      <td>Benchmark</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="6">ResNet34+U<sup>3</sup>-xi</td>
-      <td rowspan="6">7.92 M</td>
-      <td rowspan="2">UAAM-Softmax</td>
-      <td>No</td>
-      <td>0.888</td>
-      <td>0.085</td>
-      <td>0.900</td>
-      <td>0.099</td>
-      <td>1.712</td>
-      <td>0.175</td>
-      <td>9.68</td>
-      <td>11.732</td>
-      <td>0.513</td>
-      <td>-5.46</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>0.867</td>
-      <td>0.078</td>
-      <td>0.868</td>
-      <td>0.095</td>
-      <td>1.641</td>
-      <td>0.172</td>
-      <td>13.29</td>
-      <td>10.082</td>
-      <td>0.541</td>
-      <td>-0.89</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2"><a href="https://drive.google.com/drive/folders/1c9ohIlh6re-R4MdqW3x2wGb6nGvyq6Au?usp=sharing">UAAM-Softmax inter-intra</a></td>
-      <td>No</td>
-      <td>0.904</td>
-      <td><strong>0.070</strong></td>
-      <td>0.933</td>
-      <td>0.098</td>
-      <td>1.658</td>
-      <td><strong>0.165</strong></td>
-      <td>13.06</td>
-      <td>12.116</td>
-      <td>0.505</td>
-      <td>-6.37</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td><strong>0.813</strong></td>
-      <td>0.075</td>
-      <td><strong>0.847</strong></td>
-      <td><strong>0.091</strong></td>
-      <td><strong>1.532</strong></td>
-      <td>0.167</td>
-      <td>17.12</td>
-      <td><strong>9.631</strong></td>
-      <td>0.539</td>
-      <td>1.35</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2">USphereFace2 inter-intra</td>
-      <td>No</td>
-      <td>1.483</td>
-      <td>0.148</td>
-      <td>1.451</td>
-      <td>0.156</td>
-      <td>2.112</td>
-      <td>0.206</td>
-      <td>-36.00</td>
-      <td>11.441</td>
-      <td>0.512</td>
-      <td>-4.04</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>1.340</td>
-      <td>0.156</td>
-      <td>1.357</td>
-      <td>0.150</td>
-      <td>1.986</td>
-      <td>0.193</td>
-      <td>-30.19</td>
-      <td>10.949</td>
-      <td>0.499</td>
-      <td>-0.49</td>
-    </tr>
-    <tr style="border-top: 6px double #000;">
-      <td>ReDimNet-B2</td>
-      <td>4.89 M</td>
-      <td>AAM-Softmax</td>
-      <td>No</td>
-      <td>0.782</td>
-      <td>0.064</td>
-      <td>0.907</td>
-      <td>0.097</td>
-      <td>1.667</td>
-      <td>0.162</td>
-      <td>Benchmark</td>
-      <td>12.385</td>
-      <td>0.552</td>
-      <td>Benchmark</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="6">ReDimNet-B2+U<sup>3</sup>-xi</td>
-      <td rowspan="6">5.46 M</td>
-      <td rowspan="2">UAAM-Softmax</td>
-      <td>No</td>
-      <td>0.649</td>
-      <td>0.073</td>
-      <td>0.801</td>
-      <td>0.089</td>
-      <td>1.532</td>
-      <td>0.153</td>
-      <td>6.09</td>
-      <td>13.464</td>
-      <td>0.552</td>
-      <td>-4.36</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td><strong>0.606</strong></td>
-      <td>0.065</td>
-      <td>0.779</td>
-      <td>0.091</td>
-      <td>1.494</td>
-      <td>0.157</td>
-      <td>9.12</td>
-      <td>9.479</td>
-      <td>1.000</td>
-      <td>-28.85</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2"><a href="https://drive.google.com/drive/folders/1vROZR5yv-CG897qEguFXR9xRBvZjQ590?usp=sharing">UAAM-Softmax inter-intra</a></td>
-      <td>No</td>
-      <td>0.686</td>
-      <td>0.070</td>
-      <td>0.802</td>
-      <td>0.090</td>
-      <td>1.536</td>
-      <td>0.151</td>
-      <td>6.06</td>
-      <td>12.132</td>
-      <td>0.516</td>
-      <td>4.28</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>0.627</td>
-      <td>0.064</td>
-      <td><strong>0.758</strong></td>
-      <td>0.088</td>
-      <td>1.434</td>
-      <td>0.153</td>
-      <td>10.84</td>
-      <td><strong>8.607</strong></td>
-      <td>0.838</td>
-      <td>-10.65</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td rowspan="2"><a href="https://drive.google.com/drive/folders/17CKqWU2bq4ugsNpFU2DYxCgbh1te5ikT?usp=sharing">USphereFace2 inter-intra</a></td>
-      <td>No</td>
-      <td>0.622</td>
-      <td>0.052</td>
-      <td>0.776</td>
-      <td>0.085</td>
-      <td>1.440</td>
-      <td>0.146</td>
-      <td>14.92</td>
-      <td>12.081</td>
-      <td>0.515</td>
-      <td>4.58</td>
-    </tr>
-    <tr style="border-top: 3px solid #000;">
-      <td>Yes</td>
-      <td>0.622</td>
-      <td><strong>0.051</strong></td>
-      <td>0.774</td>
-      <td><strong>0.084</strong></td>
-      <td><strong>1.433</strong></td>
-      <td><strong>0.145</strong></td>
-      <td>15.56</td>
-      <td>11.899</td>
-      <td><strong>0.506</strong></td>
-      <td>6.13</td>
-    </tr>
+    <tr style="border-top: 6px double #000;"><td rowspan="11">ECAPA512</td><td rowspan="11">6.19 M</td><td>AAM-Softmax</td><td>No</td><td>1.069</td><td>0.122</td><td>1.209</td><td>0.136</td><td>2.310</td><td>0.226</td><td>Benchmark</td><td>15.314</td><td>0.633</td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2">UAAM-Softmax</td><td>No</td><td>0.856</td><td>0.109</td><td>1.064</td><td>0.121</td><td>1.982</td><td>0.195</td><td>13.57</td><td>13.706</td><td>0.608</td><td>7.23</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>0.782</td><td>0.100</td><td>1.016</td><td>0.115</td><td>1.888</td><td>0.187</td><td>18.64</td><td>10.271</td><td>1.000</td><td>-12.52</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2"><a href="https://drive.google.com/drive/folders/1PcI8UM5blXePt2ZCnyNycnj0co5a2XLa?usp=sharing">UAAM-Softmax inter-intra</a></td><td>No</td><td>0.936</td><td>0.102</td><td>1.050</td><td>0.122</td><td>1.978</td><td>0.195</td><td>13.40</td><td>13.974</td><td>0.581</td><td>8.48</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>0.840</td><td>0.086</td><td><strong>0.965</strong></td><td>0.110</td><td>1.833</td><td>0.189</td><td><strong>21.22</strong></td><td>10.781</td><td>0.835</td><td>-1.16</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>AM-Softmax</td><td>No</td><td>1.005</td><td>0.107</td><td>1.206</td><td>0.133</td><td>2.254</td><td>0.221</td><td>Benchmark</td><td>14.162</td><td>0.611</td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2"><a href="https://drive.google.com/drive/folders/1t9SOt2XlNk4RGV8Q5TfEjZb2iUltIWJl?usp=sharing">UAM-Softmax inter-intra</a></td><td>No</td><td>0.888</td><td>0.099</td><td>1.076</td><td>0.119</td><td>1.973</td><td>0.186</td><td>11.46</td><td>12.436</td><td>0.553</td><td><strong>10.84</strong></td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>0.808</td><td><strong>0.084</strong></td><td>0.991</td><td>0.109</td><td>1.794</td><td><strong>0.178</strong></td><td>19.46</td><td><strong>9.411</strong></td><td>1.000</td><td>-15.03</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>SphereFace2</td><td>No</td><td>0.963</td><td>0.108</td><td>1.121</td><td>0.125</td><td>1.967</td><td>0.199</td><td>Benchmark</td><td>12.582</td><td>0.573</td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2"><a href="https://drive.google.com/drive/folders/1Luy6GQ7OBWhdbfTkLcgSN7QV4bz2dl0W?usp=sharing">USphereFace2 inter-intra</a></td><td>No</td><td>0.856</td><td>0.104</td><td>1.035</td><td>0.119</td><td>1.918</td><td>0.196</td><td>5.21</td><td>12.265</td><td><strong>0.550</strong></td><td>3.27</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td><strong>0.739</strong></td><td>0.102</td><td><strong>0.965</strong></td><td><strong>0.108</strong></td><td><strong>1.771</strong></td><td><strong>0.178</strong></td><td>12.81</td><td>10.560</td><td>0.624</td><td>3.59</td></tr>
+    <tr style="border-top: 6px double #000;"><td rowspan="7">ResNet34</td><td rowspan="7">6.63 M</td><td>AAM-Softmax</td><td>No</td><td>0.867</td><td>0.091</td><td>1.049</td><td>0.121</td><td>1.960</td><td>0.192</td><td>Benchmark</td><td>11.090</td><td><strong>0.488</strong></td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2">UAAM-Softmax</td><td>No</td><td>0.888</td><td>0.085</td><td>0.900</td><td>0.099</td><td>1.712</td><td>0.175</td><td>9.68</td><td>11.732</td><td>0.513</td><td>-5.46</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>0.867</td><td>0.078</td><td>0.868</td><td>0.095</td><td>1.641</td><td>0.172</td><td>13.29</td><td>10.082</td><td>0.541</td><td>-0.89</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2"><a href="https://drive.google.com/drive/folders/1c9ohIlh6re-R4MdqW3x2wGb6nGvyq6Au?usp=sharing">UAAM-Softmax inter-intra</a></td><td>No</td><td>0.904</td><td><strong>0.070</strong></td><td>0.933</td><td>0.098</td><td>1.658</td><td><strong>0.165</strong></td><td>13.06</td><td>12.116</td><td>0.505</td><td>-6.37</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td><strong>0.813</strong></td><td>0.075</td><td><strong>0.847</strong></td><td><strong>0.091</strong></td><td><strong>1.532</strong></td><td>0.167</td><td><strong>17.12</strong></td><td><strong>9.631</strong></td><td>0.539</td><td><strong>1.35</strong></td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2">USphereFace2</td><td>No</td><td>1.483</td><td>0.148</td><td>1.451</td><td>0.156</td><td>2.112</td><td>0.206</td><td>-36.00</td><td>11.441</td><td>0.512</td><td>-4.04</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>1.340</td><td>0.156</td><td>1.357</td><td>0.150</td><td>1.986</td><td>0.193</td><td>-30.19</td><td>10.949</td><td>0.499</td><td>-0.49</td></tr>
+    <tr style="border-top: 6px double #000;"><td rowspan="7">ReDimNet-B2</td><td rowspan="7">4.89 M</td><td>AAM-Softmax</td><td>No</td><td>0.782</td><td>0.064</td><td>0.907</td><td>0.097</td><td>1.667</td><td>0.162</td><td>Benchmark</td><td>12.385</td><td>0.552</td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2">UAAM-Softmax</td><td>No</td><td>0.649</td><td>0.073</td><td>0.801</td><td>0.089</td><td>1.532</td><td>0.153</td><td>6.09</td><td>13.464</td><td>0.552</td><td>-4.36</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td><strong>0.606</strong></td><td>0.065</td><td>0.779</td><td>0.091</td><td>1.494</td><td>0.157</td><td>9.12</td><td>9.479</td><td>1.000</td><td>-28.85</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2"><a href="https://drive.google.com/drive/folders/1vROZR5yv-CG897qEguFXR9xRBvZjQ590?usp=sharing">UAAM-Softmax inter-intra</a></td><td>No</td><td>0.686</td><td>0.070</td><td>0.802</td><td>0.090</td><td>1.536</td><td>0.151</td><td>6.06</td><td>12.132</td><td>0.516</td><td>4.28</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>0.627</td><td>0.064</td><td><strong>0.758</strong></td><td>0.088</td><td>1.434</td><td>0.153</td><td>10.84</td><td><strong>8.607</strong></td><td>0.838</td><td>-10.65</td></tr>
+    <tr style="border-top: 3px solid #000;"><td rowspan="2"><a href="https://drive.google.com/drive/folders/17CKqWU2bq4ugsNpFU2DYxCgbh1te5ikT?usp=sharing">USphereFace2 inter-intra</a></td><td>No</td><td>0.622</td><td>0.052</td><td>0.776</td><td>0.085</td><td>1.440</td><td>0.146</td><td>14.92</td><td>12.081</td><td>0.515</td><td>4.58</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>Yes</td><td>0.622</td><td><strong>0.051</strong></td><td>0.774</td><td><strong>0.084</strong></td><td><strong>1.433</strong></td><td><strong>0.145</strong></td><td><strong>15.56</strong></td><td>11.899</td><td><strong>0.506</strong></td><td><strong>6.13</strong></td></tr>
   </tbody>
 </table>
 
+
+
+
+
+# 3. Uncertainty Score Normalization and Calibration for Speaker Verification (deprecated)
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2601.15719">
+    <img src="https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg"/>
+  </a>
+</p>
+
+This section describes the implementation of  
+**"Uncertainty Score Normalization and Calibration for Speaker Verification."**
+
+We introduce three main components:
+
+- **Uncertainty-aware cosine scoring**
+- **UAS-Norm**: Uncertainty-Aware AS-Norm
+- **UQMFs**: Uncertainty-Aware Quality Measure Functions
+
+## 🚀 Experiments
+
+Our experiments are located in the [examples/voxceleb/v2](examples/voxceleb/v2) directory.
+
+- **Uncertainty extraction**
+  - [local/extract_vox_uncertainty.sh](examples/voxceleb/v2/local/extract_vox_uncertainty.sh)
+  - [tools/extract_embedding_uncertainty.sh](examples/voxceleb/v2/tools/extract_embedding_uncertainty.sh)
+  - [wespeaker/bin/extract_uncertainty.py](wespeaker/bin/extract_uncertainty.py)
+
+- **Uncertainty-aware cosine scoring**
+  - [local/score_uncertainty.sh](examples/voxceleb/v2/local/score_uncertainty.sh)
+  - [wespeaker/bin/score_uncertainty.py](wespeaker/bin/score_uncertainty.py)
+
+- **Uncertainty-aware AS-Norm**: uncertainty-aware cosine scoring + uncertainty-aware AS-Norm
+  - [local/score_norm_uncertainty.sh](examples/voxceleb/v2/local/score_norm_uncertainty.sh)
+  - [variance_mean.py](examples/voxceleb/v2/tools/variance_mean.py)
+  - [wespeaker/bin/score_norm_uncertainty.py](wespeaker/bin/score_norm_uncertainty.py)
+
+- **Uncertainty-aware QMFs**: uncertainty-aware cosine scoring + uncertainty-aware AS-Norm + uncertainty-aware QMFs
+  - [local/score_calibration_uncertainty.sh](examples/voxceleb/v2/local/score_calibration_uncertainty.sh)
+  - [wespeaker/bin/score_norm_forvox2.py](wespeaker/bin/score_norm_forvox2.py)
+  - [wespeaker/bin/score_calibration_uncertain.py](wespeaker/bin/score_calibration_uncertain.py)
+
+  
