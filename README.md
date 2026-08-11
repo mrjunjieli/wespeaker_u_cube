@@ -13,6 +13,9 @@
   <a href="https://arxiv.org/abs/2601.15719">
     <img src="https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg"/>
   </a>
+  <a href="https://huggingface.co/JeffeLI/u_cube_xi">
+    <img src="https://img.shields.io/badge/Hugging%20Face-Model-yellow?logo=huggingface"/>
+  </a>
   <img src="https://visitor-badge.laobi.icu/badge?page_id=mrjunjieli.wespeaker_u_cube"/>
   <img src="https://img.shields.io/github/stars/mrjunjieli/wespeaker_u_cube?style=social"/>
 </p>
@@ -182,7 +185,7 @@ In this work, we propose two uncertainty-aware speaker modeling methods:
 # 3. Uncertainty Score Normalization and Calibration for Speaker Verification (deprecated)
 
 <p align="center">
-  <a href="https://arxiv.org/abs/2601.15719">
+  <a href="">
     <img src="https://img.shields.io/badge/arXiv-2308.08143-b31b1b.svg"/>
   </a>
 </p>
@@ -216,7 +219,27 @@ Our experiments are located in the [examples/voxceleb/v2](examples/voxceleb/v2) 
 
 - **Uncertainty-aware QMFs**: uncertainty-aware cosine scoring + uncertainty-aware AS-Norm + uncertainty-aware QMFs
   - [local/score_calibration_uncertainty.sh](examples/voxceleb/v2/local/score_calibration_uncertainty.sh)
-  - [wespeaker/bin/score_norm_forvox2.py](wespeaker/bin/score_norm_forvox2.py)
-  - [wespeaker/bin/score_calibration_uncertain.py](wespeaker/bin/score_calibration_uncertain.py)
+  - [wespeaker/bin/score_norm_forvox2.py](examples/voxceleb/v2/wespeaker/bin/score_norm_forvox2.py)
+  - [wespeaker/bin/score_calibration_uncertain.py](examples/voxceleb/v2/wespeaker/bin/score_calibration_uncertain.py)
 
-  
+## 📚 Citation
+
+If you find this repository useful, please cite our papers in IEEE format:
+
+```bibtex
+@article{li2026u3xi,
+  author  = {Junjie Li and Kong Aik Lee},
+  title   = {{U3}-xi: Pushing the Boundaries of Speaker Recognition by Incorporating Uncertainty},
+  journal = {arXiv preprint arXiv:2601.15719},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2601.15719}
+}
+
+@article{li2026robust,
+  author  = {Junjie Li and Yang Xiao and Kong Aik Lee},
+  title   = {Towards Robust Uncertainty-Aware Speaker Modeling},
+  journal = {arXiv preprint arXiv:2607.04937},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2607.04937}
+}
+```
