@@ -28,47 +28,62 @@ def get_mean_std_uncertainty(
     cohort,
     cohort_var,
     top_n,
-    eps=1e-6
+    eps=1e-6,
+    batch_size=512,
 ):
     """
+    Compute uncertainty-weighted cohort statistics in batches.
+
     emb:        [B, D]
     cohort:     [C, D]
     cohort_var: [C, D]   (diagonal variance)
     """
-    # ---- L2 normalize ----
+    if top_n > cohort.shape[0]:
+        raise ValueError(
+            "top_n ({}) cannot exceed cohort size ({})".format(
+                top_n, cohort.shape[0]))
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+
+    # Normalize once, then limit the large intermediate arrays to one batch.
     emb = emb / (np.linalg.norm(emb, axis=1, keepdims=True) + eps)
     cohort = cohort / (np.linalg.norm(cohort, axis=1, keepdims=True) + eps)
 
-    # ---- cosine similarity ----
-    scores = emb @ cohort.T                 # [B, C]
+    means = []
+    stds = []
+    for start in range(0, emb.shape[0], batch_size):
+        emb_batch = emb[start:start + batch_size]
 
-    # ---- top-N selection ----
-    idx = np.argpartition(scores, -top_n, axis=1)[:, -top_n:]
-    scores_topn = np.take_along_axis(scores, idx, axis=1)   # [B, N]
+        # ---- cosine similarity ----
+        scores = emb_batch @ cohort.T                 # [b, C]
 
-    # ---- variance of score (ONLY top-N) ----
-    emb_sq = emb ** 2                        # [B, D]
-    cohort_var_topn = cohort_var[idx]        # [B, N, D]
+        # ---- top-N selection ----
+        idx = np.argpartition(scores, -top_n, axis=1)[:, -top_n:]
+        scores_topn = np.take_along_axis(scores, idx, axis=1)  # [b, N]
 
-    # Var(e^T c) = sum_d e_d^2 * Var(c_d)
-    score_var_topn = np.sum(
-        cohort_var_topn * emb_sq[:, None, :],
-        axis=-1
-    )                                        # [B, N]
-
-    # weighted mean
-    precision = 1.0 / (score_var_topn + eps)
-    mean = np.sum(precision * scores_topn, axis=1) / np.sum(precision, axis=1)
-
-    #  weighted variance
-    var = np.sum(
-        precision * (scores_topn - mean[:, None]) ** 2,
-        axis=1
-    ) / np.sum(precision, axis=1)
-    std = np.sqrt(var + eps)
+        cohort_sq_topn = cohort[idx] ** 2
+        cohort_var_topn = cohort_var[idx]
+        score_var_topn = np.sum(
+            cohort_var_topn * cohort_sq_topn,
+            axis=-1
+        )
 
 
-    return mean, std
+        # weighted mean
+        precision = 1.0 / (score_var_topn + eps)
+        precision_sum = np.sum(precision, axis=1)
+        mean = np.sum(precision * scores_topn, axis=1) / precision_sum
+
+        # weighted variance
+        var = np.sum(
+            precision * (scores_topn - mean[:, None]) ** 2,
+            axis=1,
+        ) / precision_sum
+
+        means.append(mean)
+        stds.append(np.sqrt(var + eps))
+
+    return np.concatenate(means), np.concatenate(stds)
 
 
   
@@ -111,7 +126,8 @@ def main(score_norm_method,
          cohort_var_scp,
          eval_emb_scp,
          eval_uncertainty_scp=None,
-         mean_vec_path=None):
+         mean_vec_path=None,
+         batch_size=512):
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(message)s')
     # get embedding
@@ -156,8 +172,10 @@ def main(score_norm_method,
         raise ValueError(score_norm_method)
    
 
-    enroll_mean, enroll_std = get_mean_std_uncertainty(enroll_emb, cohort_emb, cohort_var, top_n)
-    test_mean, test_std = get_mean_std_uncertainty(test_emb, cohort_emb, cohort_var, top_n)
+    enroll_mean, enroll_std = get_mean_std_uncertainty(
+        enroll_emb, cohort_emb, cohort_var, top_n, batch_size=batch_size)
+    test_mean, test_std = get_mean_std_uncertainty(
+        test_emb, cohort_emb, cohort_var, top_n, batch_size=batch_size)
 
     # score norm
     with open(trial_score_file, 'r', encoding='utf-8') as fin:
@@ -172,10 +190,12 @@ def main(score_norm_method,
                 test_var_c = test_var[test_idx]
 
                 
-                alpha_1 = np.dot(enroll_emb[enroll_idx], enroll_emb[enroll_idx])/np.sum(enroll_emb[enroll_idx] / (1+enroll_var_c) *enroll_emb[enroll_idx])
+                alpha_1 = np.dot(enroll_emb[enroll_idx], enroll_emb[enroll_idx]) / np.sum(
+                    enroll_emb[enroll_idx] / (1 + enroll_var_c + 1e-6) * enroll_emb[enroll_idx])
                 alpha_1 = alpha_1**0.5
 
-                alpha_2 = np.dot(test_emb[test_idx], test_emb[test_idx])/np.sum(test_emb[test_idx] / (1+test_var_c) *test_emb[test_idx])
+                alpha_2 = np.dot(test_emb[test_idx], test_emb[test_idx]) / np.sum(
+                    test_emb[test_idx] / (1 + test_var_c + 1e-6) * test_emb[test_idx])
                 alpha_2 = alpha_2**0.5
                 normed_score = alpha_1*(score - enroll_mean[enroll_idx]) / enroll_std[enroll_idx] \
                     + alpha_2*(score - test_mean[test_idx]) / test_std[test_idx]
@@ -186,16 +206,16 @@ def main(score_norm_method,
 
 
 
-                enroll_mag_u = np.sqrt(
-                    np.sum(enroll_emb[enroll_idx]**2 / (enroll_var_c )))
-                test_mag_u = np.sqrt(
-                    np.sum(test_emb[test_idx]**2 / (test_var_c)))
+                # enroll_mag_u = np.sqrt(
+                #     np.sum(enroll_emb[enroll_idx]**2 / (enroll_var_c + 1e-6 )))
+                # test_mag_u = np.sqrt(
+                #     np.sum(test_emb[test_idx]**2 / (test_var_c + 1e-6)))
                 
                 # enroll_mag_u2 
-                # enroll_mag_u = np.sqrt(
-                #     np.sum(enroll_emb[enroll_idx]**2 / (enroll_var_c + 1)))
-                # test_mag_u = np.sqrt(
-                #     np.sum(test_emb[test_idx]**2 / (test_var_c + 1)))   
+                enroll_mag_u = np.sqrt(
+                    np.sum(enroll_emb[enroll_idx]**2 / (enroll_var_c + 1)))
+                test_mag_u = np.sqrt(
+                    np.sum(test_emb[test_idx]**2 / (test_var_c + 1)))   
 
                 fout.write(
                     '{} {} {:.5f} {} {:.4f} {:.4f} {:.4f} {:.4f}   \n'.format(

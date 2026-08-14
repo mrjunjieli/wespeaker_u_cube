@@ -64,11 +64,8 @@ done
 
 wait
 
-shopt -s extglob  # 启用扩展正则匹配
-cat ${embed_dir}/xvector_+([0-9]).scp > ${embed_dir}/xvector.scp
-shopt -u extglob  # 关闭扩展正则匹配
-
-cat ${embed_dir}/xvector_*_variance.scp >${embed_dir}/xvector_variance.scp
+cat "${embed_dir}"/xvector_[0-9][0-9][0-9].scp > "${embed_dir}/xvector.scp"
+cat "${embed_dir}"/xvector_[0-9][0-9][0-9]_variance.scp > "${embed_dir}/xvector_variance.scp"
 embed_num=$(wc -l ${embed_dir}/xvector.scp | awk '{print $1}')
 variance_num=$(wc -l ${embed_dir}/xvector_variance.scp | awk '{print $1}')
 if [ $embed_num -eq $wavs_num ]; then

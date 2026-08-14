@@ -17,6 +17,7 @@
 score_norm_method="asnorm"  # asnorm/snorm
 cohort_set=vox2_dev
 top_n=100
+batch_size=512
 exp_dir=
 trials="vox1_O_cleaned.kaldi vox1_E_cleaned.kaldi vox1_H_cleaned.kaldi"
 data=data
@@ -57,7 +58,8 @@ if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
       --cohort_var_scp ${exp_dir}/embeddings/${cohort_set}/spk_xvector_variance.scp \
       --eval_emb_scp ${exp_dir}/embeddings/vox1/xvector.scp \
       --eval_uncertainty_scp ${exp_dir}/embeddings/vox1/xvector_variance.scp \
-      --mean_vec_path ${exp_dir}/embeddings/vox2_dev/mean_vec.npy
+      --mean_vec_path ${exp_dir}/embeddings/vox2_dev/mean_vec.npy \
+      --batch_size $batch_size
   done
 fi
 
