@@ -182,7 +182,7 @@ In this work, we propose two uncertainty-aware speaker modeling methods:
 
 
 
-# 3. Uncertainty Score Normalization and Calibration for Speaker Verification (deprecated)
+# 3. Uncertainty Score Normalization and Calibration for Speaker Verification 
 
 <p align="center">
   <a href="">
@@ -221,6 +221,55 @@ Our experiments are located in the [examples/voxceleb/v2](examples/voxceleb/v2) 
   - [local/score_calibration_uncertainty.sh](examples/voxceleb/v2/local/score_calibration_uncertainty.sh)
   - [wespeaker/bin/score_norm_forvox2.py](examples/voxceleb/v2/wespeaker/bin/score_norm_forvox2.py)
   - [wespeaker/bin/score_calibration_uncertain.py](examples/voxceleb/v2/wespeaker/bin/score_calibration_uncertain.py)
+
+## 📊 Results
+
+The table reports EER and minDCF on Vox1-O, Vox1-E, and Vox1-H. Lower values are better. **Bold** and <u>underlined</u> values denote the best and second-best results, respectively, within each architecture group. RI is the average relative improvement over the corresponding architecture-specific benchmark across the six VoxCeleb metrics.
+
+<table style="border-collapse: collapse; border-top: 3px solid #000; border-bottom: 3px solid #000;">
+  <thead>
+    <tr>
+      <th rowspan="2">Row</th>
+      <th rowspan="2">Model</th>
+      <th rowspan="2"># Param.</th>
+      <th rowspan="2">Cosine score</th>
+      <th rowspan="2">AS-Norm</th>
+      <th rowspan="2">QMFs</th>
+      <th colspan="2">Vox1-O</th>
+      <th colspan="2">Vox1-E</th>
+      <th colspan="2">Vox1-H</th>
+      <th rowspan="2">RI (%)</th>
+    </tr>
+    <tr>
+      <th>EER</th>
+      <th>minDCF</th>
+      <th>EER</th>
+      <th>minDCF</th>
+      <th>EER</th>
+      <th>minDCF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="color: #777;"><td>1</td><td>ECAPA<sup>†</sup></td><td>6.19 M</td><td><i>s</i><sub>cos-o</sub></td><td></td><td></td><td>1.069</td><td>0.122</td><td>1.209</td><td>0.136</td><td>2.310</td><td>0.226</td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>2</td><td rowspan="8">ECAPA+xi</td><td rowspan="8">6.69 M</td><td><i>s</i><sub>cos-o</sub></td><td></td><td></td><td>0.936</td><td>0.100</td><td>1.054</td><td>0.123</td><td>1.978</td><td>0.195</td><td>13.49</td></tr>
+    <tr><td>3</td><td><i>s</i><sub>cos-o</sub></td><td><i>s</i><sub>AS-o</sub></td><td></td><td>0.840</td><td>0.111</td><td>0.979</td><td>0.115</td><td>1.809</td><td>0.173</td><td>18.34</td></tr>
+    <tr><td>4</td><td><i>s</i><sub>cos-o</sub></td><td><i>s</i><sub>AS-o</sub></td><td><i>s</i><sub>QMF-o</sub></td><td><u>0.766</u></td><td>0.106</td><td><u>0.932</u></td><td>0.108</td><td><u>1.693</u></td><td><u>0.167</u></td><td>22.96</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>5</td><td><i>s</i><sub>cos-u</sub></td><td></td><td></td><td>0.840</td><td><b>0.086</b></td><td>0.965</td><td>0.110</td><td>1.833</td><td>0.189</td><td>21.21</td></tr>
+    <tr><td>6</td><td><i>s</i><sub>cos-u</sub></td><td><i>s</i><sub>AS-u</sub> (①)</td><td></td><td>0.761</td><td>0.101</td><td>0.913</td><td>0.104</td><td>1.677</td><td>0.167</td><td>24.59</td></tr>
+    <tr><td>7</td><td><i>s</i><sub>cos-u</sub></td><td><i>s</i><sub>AS-u</sub> (①+②)</td><td></td><td>0.761</td><td>0.100</td><td>0.912</td><td>0.104</td><td>1.675</td><td><b>0.166</b></td><td>24.83</td></tr>
+    <tr><td>8</td><td><i>s</i><sub>cos-u</sub></td><td><i>s</i><sub>AS-u</sub> (①+②+③)</td><td></td><td><b>0.750</b></td><td>0.098</td><td>0.906</td><td>0.100</td><td>1.663</td><td>0.167</td><td>25.86</td></tr>
+    <tr><td>9</td><td><i>s</i><sub>cos-u</sub></td><td><i>s</i><sub>AS-u</sub></td><td><i>s</i><sub>QMF-u</sub></td><td><b>0.750</b></td><td><u>0.095</u></td><td><b>0.892</b></td><td><b>0.090</b></td><td><b>1.629</b></td><td><b>0.166</b></td><td>28.01</td></tr>
+    <tr style="border-top: 6px double #000; color: #777;"><td>10</td><td>ResNet<sup>†</sup></td><td>6.63 M</td><td><i>s</i><sub>cos-o</sub></td><td></td><td></td><td>0.867</td><td>0.091</td><td>1.049</td><td>0.121</td><td>1.960</td><td>0.192</td><td>Benchmark</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>11</td><td rowspan="6">ResNet+xi</td><td rowspan="6">7.92 M</td><td><i>s</i><sub>cos-o</sub></td><td></td><td></td><td>0.904</td><td>0.070</td><td>0.933</td><td>0.098</td><td>1.658</td><td>0.165</td><td>13.06</td></tr>
+    <tr><td>12</td><td><i>s</i><sub>cos-o</sub></td><td><i>s</i><sub>AS-o</sub></td><td></td><td>0.888</td><td>0.079</td><td>0.922</td><td>0.096</td><td>1.618</td><td>0.163</td><td>12.68</td></tr>
+    <tr><td>13</td><td><i>s</i><sub>cos-o</sub></td><td><i>s</i><sub>AS-o</sub></td><td><i>s</i><sub>QMF-o</sub></td><td>0.782</td><td>0.065</td><td>0.842</td><td><u>0.090</u></td><td>1.489</td><td><u>0.151</u></td><td>21.52</td></tr>
+    <tr style="border-top: 3px solid #000;"><td>14</td><td><i>s</i><sub>cos-u</sub></td><td></td><td></td><td>0.813</td><td>0.075</td><td>0.847</td><td>0.091</td><td>1.532</td><td>0.167</td><td>17.12</td></tr>
+    <tr><td>15</td><td><i>s</i><sub>cos-u</sub></td><td><i>s</i><sub>AS-u</sub></td><td></td><td><u>0.771</u></td><td><b>0.052</b></td><td><u>0.805</u></td><td><b>0.086</b></td><td><u>1.400</u></td><td><b>0.145</b></td><td>26.53</td></tr>
+    <tr><td>16</td><td><i>s</i><sub>cos-u</sub></td><td><i>s</i><sub>AS-u</sub></td><td><i>s</i><sub>QMF-u</sub></td><td><b>0.745</b></td><td><u>0.053</u></td><td><b>0.793</b></td><td><b>0.086</b></td><td><b>1.386</b></td><td><b>0.145</b></td><td>27.15</td></tr>
+  </tbody>
+</table>
+
+<sup>†</sup> These results are directly inferred using the pretrained WeSpeaker model.
 
 ## 📚 Citation
 
