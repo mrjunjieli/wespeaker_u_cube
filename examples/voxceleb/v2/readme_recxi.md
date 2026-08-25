@@ -174,14 +174,28 @@ bash run_recxi.sh \
 
 ## Reference results
 
-The following results were obtained with the same RecXi c512 configuration after 150 epochs of VoxCeleb2 training. They are provided as reference values; a fresh run in this repository is required to verify reproduction.
+### Original ECAPA-TDNN + RecXi
 
-| Scoring | Vox1-O EER/minDCF | Vox1-E EER/minDCF | Vox1-H EER/minDCF |
+The following results are taken from Table 2 of the original RecXi paper [[2]](#ref-2). They compare the channel-and-context aggregation baseline, Xi pooling, and the proposed ECAPA-TDNN + RecXi system. The metrics are EER (%) and minDCF.
+
+| # | Aggregation layer | Params (M) | Vox1-O EER/minDCF | Vox1-H EER/minDCF | Vox1-E EER/minDCF | SITW eval EER/minDCF |
+|---:|---|---:|---:|---:|---:|---:|
+| 1 | Channel & Context | 6.19 | 1.377 / 0.137 | 2.674 / 0.235 | 1.451 / 0.153 | 2.542 / 0.208 |
+| 10 | Xi | 5.90 | 1.340 / 0.140 | 2.647 / 0.237 | 1.429 / 0.148 | 2.679 / 0.204 |
+| 11 | RecXi (`φ̃`, `φ̃_lin`) with Lssp | 6.43 | **1.196 / 0.107** | **2.467 / 0.227** | **1.292 / 0.141** | **2.105 / 0.184** |
+
+### Current parallel RecXi implementation
+
+The following results were obtained with the parallel RecXi c512 configuration after 150 epochs of VoxCeleb2 training. They are provided as reference values; a fresh run in this repository is required to verify reproduction.
+
+| Scoring | Vox1-O EER/minDCF | Vox1-H EER/minDCF | Vox1-E EER/minDCF |
 |---|---:|---:|---:|
-| Cosine | 0.824 / 0.093 | 0.971 / 0.111 | 1.838 / 0.183 |
-| Uncertainty-aware | 0.930 / 0.102 | 1.051 / 0.118 | 2.007 / 0.191 |
+| Cosine | **0.824 / 0.093** | **1.838 / 0.183** | **0.971 / 0.111** |
+| Uncertainty-aware | 0.930 / 0.102 | 2.007 / 0.191 | 1.051 / 0.118 |
 
-The minDCF parameters are `p_target=0.01`, `c_miss=1`, and `c_fa=1`.
+The original and current results are not a strictly controlled comparison: the implementations differ in pooling computation, precision estimator, classification objective, training recipe, and potentially software and data preparation. The tables should therefore be interpreted as published/reference results rather than as a single-variable ablation.
+
+The minDCF parameters for the current results are `p_target=0.01`, `c_miss=1`, and `c_fa=1`.
 
 ## References
 
