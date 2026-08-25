@@ -1,0 +1,87 @@
+### train configuraton
+
+exp_dir: exp/ECAPA_TDNN_RecXi_c512-emb192-fbank80
+# Command-line --gpus should override this for multi-GPU training.
+gpus: "[2,3]"
+num_avg: 10
+enable_amp: False
+
+seed: 42
+num_epochs: 150
+save_epoch_interval: 10
+log_batch_interval: 100
+
+dataloader_args:
+  batch_size: 256
+  num_workers: 12
+  pin_memory: False
+  prefetch_factor: 8
+  drop_last: True
+
+dataset_args:
+  sample_num_per_epoch: 0
+  shuffle: True
+  shuffle_args:
+    shuffle_size: 2500
+  filter: True
+  filter_args:
+    min_num_frames: 100
+    max_num_frames: 800
+  resample_rate: 16000
+  speed_perturb: True
+  num_frms: 200
+  aug_prob: 0.6
+  frontend: "fbank"
+  fbank_args:
+    num_mel_bins: 80
+    frame_shift: 10
+    frame_length: 25
+    dither: 1.0
+  spec_aug: False
+  spec_aug_args:
+    num_t_mask: 1
+    num_f_mask: 1
+    max_t: 10
+    max_f: 8
+    prob: 0.6
+
+model: ECAPA_TDNN_RecXi_c512
+model_init: null
+model_args:
+  feat_dim: 80
+  embed_dim: 192
+  hidden_size: 256
+  n_rec_xi_set: 16
+  rec_xi_hidden: 128
+projection_args:
+  project_type: "arc_margin_uncertainty"
+  easy_margin: False
+  scale: 32
+
+classifi_ratio: 1.0
+kd_ratio: 3000.0
+
+margin_scheduler: MarginScheduler
+margin_update:
+  initial_margin: 0.0
+  final_margin: 0.2
+  increase_start_epoch: 20
+  fix_start_epoch: 40
+  update_margin: True
+  increase_type: "exp"
+
+loss: CrossEntropyLoss
+loss_args: {}
+
+optimizer: SGD
+optimizer_args:
+  momentum: 0.9
+  nesterov: True
+  weight_decay: 0.0001
+
+scheduler: ExponentialDecrease
+scheduler_args:
+  initial_lr: 0.1
+  final_lr: 0.00005
+  warm_up_epoch: 6
+  warm_from_zero: True
