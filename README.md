@@ -285,6 +285,15 @@ The table reports EER and minDCF on Vox1-O, Vox1-E, and Vox1-H. Lower values are
 If you find this repository useful, please cite our papers in IEEE format:
 
 ```bibtex
+@inproceedings{li2026xiplus,
+  author    = {Junjie Li and Kong Aik Lee and Duc-Tuan Truong and Tianchi Liu and Man-Wai Mak},
+  title     = {{XI+}: Uncertainty Supervision for Robust Speaker Embedding},
+  booktitle = {2026 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  year      = {2026},
+  pages     = {18847--18851},
+  doi       = {10.1109/ICASSP55912.2026.11463369}
+}
+
 @article{li2026u3xi,
   author  = {Junjie Li and Kong Aik Lee},
   title   = {{U3}-xi: Pushing the Boundaries of Speaker Recognition by Incorporating Uncertainty},
