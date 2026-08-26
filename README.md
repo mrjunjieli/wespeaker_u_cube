@@ -1,5 +1,14 @@
 
-💡 This repository provides the official implementations of three related works on uncertainty-aware speaker recognition.
+💡 This repository provides WeSpeaker implementations and source code for uncertainty-aware speaker recognition and speaker verification.
+
+## 📚 Papers and Implementations
+
+- **[$\mathcal{U}^3$-xi: Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty](https://arxiv.org/abs/2601.15719)** — official WeSpeaker implementation of multi-view uncertainty estimation, uncertainty-aware training, and uncertainty-aware cosine scoring.
+- **[Towards Robust Uncertainty-Aware Speaker Modeling](https://arxiv.org/abs/2607.04937)** — official source code for uncertainty-aware AAM-Softmax, AM-Softmax, and SphereFace2 with inter- and intra-speaker modeling.
+- **Uncertainty Score Normalization and Calibration for Speaker Verification** — official implementation of uncertainty-aware cosine scoring, UAS-Norm, and uncertainty-aware quality measure functions.
+- **[Disentangling Voice and Content with Self-Supervision for Speaker Recognition](https://oar.a-star.edu.sg/storage/7/71gdjzekn8/2023-nips-disentangling-voice-and-content-with-self-supervision-for-speaker-recognition.pdf)** (**RecXi, NeurIPS 2023**) — an **unofficial WeSpeaker implementation and extension** with parallel RecXi pooling, a multi-view Transformer precision estimator, and uncertainty-aware AAM-Softmax. See the **[RecXi source code, training recipe, and results](examples/voxceleb/v2/readme_recxi.md)**.
+
+**Keywords:** RecXi, NeurIPS 2023, speaker recognition, speaker verification, speaker embedding, WeSpeaker implementation, source code, ECAPA-TDNN, uncertainty estimation, uncertainty-aware speaker modeling.
 
 # 1. $\mathcal{U}^3$-xi: Pushing the Boundaries of Speaker Recognition via Incorporating Uncertainty
 
