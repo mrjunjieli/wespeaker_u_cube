@@ -188,8 +188,8 @@ Reference results after 150 epochs of VoxCeleb2 training:
 
 | Scoring | Vox1-O EER/minDCF | Vox1-H EER/minDCF | Vox1-E EER/minDCF |
 |---|---:|---:|---:|
-| Cosine | **0.824 / 0.093** | **1.838 / 0.183** | **0.971 / 0.111** |
-| Uncertainty-aware | 0.930 / 0.102 | 2.007 / 0.191 | 1.051 / 0.118 |
+| Cosine | 0.930 / 0.102 | 2.007 / 0.191 | 1.051 / 0.118 |
+| Uncertainty-aware cosine | **0.824 / 0.093** | **1.838 / 0.183** | **0.971 / 0.111** |
 
 The minDCF parameters are `p_target=0.01`, `c_miss=1`, and `c_fa=1`.
 
